@@ -14,6 +14,7 @@ import (
 	"github.com/cortezaproject/corteza-server/pkg/sentry"
 	"github.com/cortezaproject/corteza-server/pkg/wfexec"
 	"github.com/cortezaproject/corteza-server/store"
+	sysAutoTypes "github.com/cortezaproject/corteza-server/system/automation"
 	"go.uber.org/zap"
 )
 
@@ -160,13 +161,32 @@ func (svc *session) PendingPrompts(ctx context.Context) (pp []*wfexec.PendingPro
 // Start is an asynchronous operation
 //
 // It does not check user's permissions to execute workflow(s) so it should be used only when !
-func (svc *session) Start(g *wfexec.Graph, i auth.Identifiable, ssp types.SessionStartParams) (wait WaitFn, err error) {
+func (svc *session) Start(g *wfexec.Graph, ssp types.SessionStartParams) (wait WaitFn, err error) {
 	var (
 		start wfexec.Step
 	)
 
+	if g == nil {
+		return nil, errors.InvalidData("cannot start workflow, uninitialized graph")
+	}
+
+	if len(ssp.CallStack) > svc.opt.CallStackSize {
+		return nil, WorkflowErrMaximumCallStackSizeExceeded()
+	}
+
+	ssp.CallStack = append(ssp.CallStack, ssp.WorkflowID)
+
+	if ssp.Invoker == nil {
+		return nil, errors.InvalidData("cannot start workflow without user")
+	}
+
+	if ssp.Runner == nil {
+		ssp.Runner = ssp.Invoker
+	}
+
 	if ssp.StepID == 0 {
-		// starting step is not explicitly workflows on trigger, find orphan step
+		// starting step is not explicitly set
+		//find orphan step
 		switch oo := g.Orphans(); len(oo) {
 		case 1:
 			start = oo[0]
@@ -182,14 +202,22 @@ func (svc *session) Start(g *wfexec.Graph, i auth.Identifiable, ssp types.Sessio
 	}
 
 	var (
-		ctx = auth.SetIdentityToContext(context.Background(), i)
+		ctx = auth.SetIdentityToContext(context.Background(), ssp.Runner)
 		ses = svc.spawn(g, ssp.WorkflowID, ssp.Trace, ssp.CallStack)
 	)
 
 	ses.CreatedAt = *now()
-	ses.CreatedBy = i.Identity()
+	ses.CreatedBy = ssp.Invoker.Identity()
 	ses.Status = types.SessionStarted
 	ses.Apply(ssp)
+
+	_ = ssp.Input.AssignFieldValue("eventType", expr.Must(expr.NewString(ssp.EventType)))
+	_ = ssp.Input.AssignFieldValue("resourceType", expr.Must(expr.NewString(ssp.ResourceType)))
+
+	// @todo find a better way to typify expression values
+	//       so that we do not have to import automation types from the system component
+	_ = ssp.Input.AssignFieldValue("invoker", expr.Must(sysAutoTypes.NewUser(ssp.Invoker)))
+	_ = ssp.Input.AssignFieldValue("runner", expr.Must(sysAutoTypes.NewUser(ssp.Runner)))
 
 	if err = ses.Exec(ctx, start, ssp.Input); err != nil {
 		return
@@ -359,6 +387,8 @@ func (svc *session) stateChangeHandler(ctx context.Context) wfexec.StateChangeHa
 			log.Warn("could not find session to update")
 			return
 		}
+
+		log = log.With(zap.Uint64("workflowID", ses.WorkflowID))
 
 		const (
 			// how often do we flush to store

@@ -684,6 +684,9 @@ func (s *Session) exec(ctx context.Context, log *zap.Logger, st *State) (nxt []*
 			} else {
 				st.next = Steps{n}
 			}
+			//executes subroutine within a same session
+			//case *sub:
+			//	result, st.err = l.Exec(ctx, s, scope)
 		}
 
 		log.Debug("step executed", zap.String("resultType", fmt.Sprintf("%T", result)))
