@@ -9,32 +9,35 @@ import (
 )
 
 type (
-
-	// state holds information about Session ID
+	// State holds information about Session ID
 	State struct {
-		created   time.Time
-		completed *time.Time
-
 		// state identifier
 		stateId uint64
+
+		// parent state
+		// root states have null
+		parent *State
+
+		created   time.Time
+		completed *time.Time
 
 		// who's running this?
 		owner auth.Identifiable
 
 		// Session identifier
-		sessionId uint64
+		session *Session
 
-		// parent, parent step
-		parent Step
+		// previous step
+		pStep Step
 
 		// current step
-		step Step
+		cStep Step
 
 		// next steps
-		next Steps
+		//next Steps
 
 		// step error (if any)
-		err error
+		//err error
 
 		// input variables that were sent to resume the session
 		input *expr.Vars
@@ -46,89 +49,227 @@ type (
 		results *expr.Vars
 
 		// error handling step
-		errHandler Step
+		//errHandler Step
 
 		// error handled flag, this gets restarted on every new state!
-		errHandled bool
+		//errHandled bool
 
-		loops []Iterator
+		//loops []Iterator
+
+		traverser block
 
 		action string
+
+		//finalize func(*expr.Vars)
 	}
 )
 
-func NewState(ses *Session, owner auth.Identifiable, caller, current Step, scope *expr.Vars) *State {
+func RootState(ses *Session, owner auth.Identifiable, step Step, scope *expr.Vars) *State {
 	return &State{
 		stateId:   nextID(),
+		created:   *(now()),
 		owner:     owner,
-		sessionId: ses.id,
-		created:   *now(),
-		parent:    caller,
-		step:      current,
+		session:   ses,
+		cStep:     step,
 		scope:     scope,
-
-		loops: make([]Iterator, 0, 4),
+		traverser: &Block{g: ses.g},
 	}
 }
 
-func FinalState(ses *Session, scope *expr.Vars) *State {
-	return &State{
-		stateId:   nextID(),
-		sessionId: ses.id,
-		created:   *now(),
-		completed: now(),
-		scope:     scope,
-	}
-}
+func (s *State) next(steps ...Step) (states []*State) {
+	states = make([]*State, len(steps))
 
-func (s State) Next(current Step, scope *expr.Vars) *State {
-	return &State{
-		stateId:    nextID(),
-		owner:      s.owner,
-		sessionId:  s.sessionId,
-		parent:     s.step,
-		errHandler: s.errHandler,
-		loops:      s.loops,
-
-		step:  current,
-		scope: scope,
-	}
-}
-
-func (s State) MakeRequest() *ExecRequest {
-	return &ExecRequest{
-		SessionID: s.sessionId,
-		StateID:   s.stateId,
-		Scope:     s.scope,
-		Input:     s.input,
-		Parent:    s.parent,
-	}
-}
-
-func (s *State) newLoop(i Iterator) {
-	s.loops = append(s.loops, i)
-}
-
-// ends loop and returns step that leads out of the loop
-func (s *State) loopEnd() (out Steps) {
-	l := len(s.loops) - 1
-	if l < 0 {
-		panic("not inside a loop")
+	if len(steps) == 1 {
+		// one outbound path,
+		// reuse state
+		s.pStep = s.cStep
+		s.cStep = steps[0]
+		states[0] = s
+		return
 	}
 
-	out = Steps{s.loops[l].Break()}
-	s.loops = s.loops[:l]
+	for i, step := range steps {
+		states[i] = &State{
+			parent:    s,
+			stateId:   nextID(),
+			created:   *(now()),
+			owner:     s.owner,
+			session:   s.session,
+			scope:     s.scope,
+			cStep:     step,
+			pStep:     s.cStep,
+			traverser: &Block{g: s.session.g},
+		}
+	}
+
 	return
 }
 
-func (s State) loopCurr() Iterator {
-	l := len(s.loops)
-	if l > 0 {
-		return s.loops[l-1]
+func (s *State) withTraverser(t block) *State {
+	if t == nil {
+		panic("traversal can not be nil")
 	}
 
-	return nil
+	return &State{
+		stateId:   nextID(),
+		created:   *(now()),
+		parent:    s,
+		owner:     s.owner,
+		session:   s.session,
+		scope:     s.scope,
+		pStep:     s.pStep,
+		cStep:     s.cStep,
+		traverser: t,
+	}
 }
+
+func (s State) isRoot() bool {
+	return s.parent == nil
+}
+
+func (s *State) level() (l int) {
+	p := s
+	for {
+		if p.isRoot() {
+			return
+		}
+
+		p = p.parent
+		l++
+	}
+}
+
+func (s *State) exit() (*State, *expr.Vars) {
+	if s.isRoot() {
+		panic("can not pop root state")
+	}
+	s.completed = now()
+
+	return s.parent, s.scope
+}
+
+// states without traverser are considered final
+//
+// We're keeping the
+func (s *State) terminate() *State {
+	s.traverser = nil
+	s.completed = now()
+	return s
+}
+
+//func NewState(ses *Session, parent *State, owner auth.Identifiable, caller, current Step, scope *expr.Vars) *State {
+//	return &State{
+//		parent:    parent,
+//		stateId:   nextID(),
+//		owner:     owner,
+//		sessionId: ses.id,
+//		created:   *now(),
+//		step:      current,
+//		scope:     scope,
+//
+//		//loops:      make([]Iterator, 0, 4),
+//		graph: func() block {
+//			if parent == nil {
+//				return &Block{g: ses.g}
+//			}
+//
+//			return parent.g
+//		}(),
+//	}
+//}
+
+//func FinalState(ses *Session, scope *expr.Vars) *State {
+//	return &State{
+//		stateId:   nextID(),
+//		sessionId: ses.id,
+//		created:   *now(),
+//		completed: now(),
+//		scope:     scope,
+//	}
+//}
+
+//func (s State) Next(current Step, scope *expr.Vars) *State {
+//	return &State{
+//		stateId:    nextID(),
+//		owner:      s.owner,
+//		sessionId:  s.sessionId,
+//		parent:     s.step,
+//		errHandler: s.errHandler,
+//		blockStack: s.blockStack,
+//
+//		step:  current,
+//		scope: scope,
+//	}
+//}
+
+func (s State) MakeRequest() *ExecRequest {
+	return &ExecRequest{
+		SessionID: s.session.ID(),
+		StateID:   s.stateId,
+		Scope:     s.scope,
+		Input:     s.input,
+		Parent:    s.pStep,
+	}
+}
+
+//func (s *State) newLoop(i Iterator) {
+//	s.loops = append(s.loops, i)
+//}
+
+//func (s *State) enterBlock(b block) {
+//	s.blockStack = append(s.blockStack, b)
+//}
+//
+//func (s *State) exitBlock() (Steps, *expr.Vars) {
+//	top := s.blockStack.top()
+//	if top == nil {
+//		// root block
+//		return nil, s.scope
+//	}
+//
+//	s.blockStack = s.blockStack[:len(s.blockStack)-1]
+//	return top.Exit()
+//}
+
+// handle error by finding a state with error handling traversal
+func (s *State) handleError(err error) (Step, error) {
+	p := s
+	for {
+		if p.isRoot() {
+			// root state can not be an error handler
+			return nil, err
+		}
+
+		if eh, is := p.traverser.(*errHandler); is {
+			// Error handler found, expecting error
+			// to be handled
+			return eh.HandleError(err)
+		}
+
+		p = p.parent
+	}
+}
+
+//// ends loop and returns step that leads out of the loop
+//func (s *State) loopEnd() (out Steps) {
+//	l := len(s.loops) - 1
+//	if l < 0 {
+//		panic("not inside a loop")
+//	}
+//
+//	out = Steps{s.loops[l].Break()}
+//	s.loops = s.loops[:l]
+//	return
+//}
+//
+//func (s State) loopCurr() Iterator {
+//	l := len(s.loops)
+//	if l > 0 {
+//		return s.loops[l-1]
+//	}
+//
+//	return nil
+//}
 
 func (s State) MakeFrame() *Frame {
 	var (
@@ -144,25 +285,25 @@ func (s State) MakeFrame() *Frame {
 
 	f := &Frame{
 		CreatedAt: s.created,
-		SessionID: s.sessionId,
+		SessionID: s.session.id,
 		StateID:   s.stateId,
 		Input:     unref(s.input),
 		Scope:     unref(s.scope),
 		Results:   unref(s.results),
-		NextSteps: s.next.IDs(),
-		Action:    s.action,
+		//NextSteps: s.next.IDs(),
+		Action: s.action,
 	}
 
-	if s.err != nil {
-		f.Error = s.err.Error()
+	//if s.err != nil {
+	//	f.Error = s.err.Error()
+	//}
+
+	if s.cStep != nil {
+		f.StepID = s.cStep.ID()
 	}
 
-	if s.step != nil {
-		f.StepID = s.step.ID()
-	}
-
-	if s.parent != nil {
-		f.ParentID = s.parent.ID()
+	if s.pStep != nil {
+		f.ParentID = s.pStep.ID()
 	}
 
 	if s.completed != nil {
@@ -172,10 +313,11 @@ func (s State) MakeFrame() *Frame {
 	return f
 }
 
-func (s *State) Error() string {
-	if s.err == nil {
-		return ""
-	}
-
-	return s.err.Error()
-}
+//func (s *State) Error() string {
+//	//if s.err == nil {
+//	//	return ""
+//	//}
+//	//
+//	//return s.err.Error()
+//	return ""
+//}

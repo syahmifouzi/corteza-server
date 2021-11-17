@@ -1,9 +1,5 @@
 package wfexec
 
-import (
-	"context"
-)
-
 type (
 	// list of Graph steps with relations
 	Graph struct {
@@ -58,11 +54,6 @@ func (g *Graph) Children(s Step) Steps {
 
 func (g *Graph) Parents(s Step) Steps {
 	return g.parents[s]
-}
-
-func (g *Graph) Exec(context.Context, *ExecRequest) (ExecResponse, error) {
-	// @todo
-	return nil, nil
 }
 
 func (g *Graph) Orphans() (oo Steps) {

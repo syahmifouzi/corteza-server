@@ -1,0 +1,36 @@
+workflows:
+  main:
+    enabled: true
+    trace: true
+
+    triggers: [ { enabled: true, stepID: 1 } ]
+
+    steps:
+      - stepID: 1
+        kind: function
+        ref: logInfo
+        arguments:
+          - {target: "message", value: "main", type: "String"}
+
+      - stepID: 2
+        kind: sub-workflow
+        ref: sub
+        arguments:
+          - {target: "message", value: "main", type: "String"}
+
+    paths:
+      - { parentID: 1, childID: 2 }
+
+
+  sub:
+    enabled: true
+    trace: true
+
+#    triggers: [ { enabled: true, stepID: 1 } ]
+
+    steps:
+      - stepID: 1
+        kind: function
+        ref: logInfo
+        arguments:
+          - {target: "message", value: "main", type: "String"}

@@ -32,3 +32,50 @@ func NewGenericStep(fn execFn) *genericStep {
 func (g *genericStep) Exec(ctx context.Context, r *ExecRequest) (ExecResponse, error) {
 	return g.fn(ctx, r)
 }
+
+func (ss Steps) hash() map[Step]bool {
+	out := make(map[Step]bool)
+	for _, s := range ss {
+		out[s] = true
+	}
+
+	return out
+}
+
+func (ss Steps) Contains(steps ...Step) bool {
+	hash := ss.hash()
+	for _, s1 := range steps {
+		if !hash[s1] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (ss Steps) Exclude(steps ...Step) Steps {
+	var (
+		included = make([]Step, 0)
+		excluded = Steps(steps).hash()
+	)
+	for _, s := range ss {
+		if !excluded[s] {
+			included = append(included, s)
+		}
+	}
+
+	return included
+}
+
+func (ss Steps) IDs() []uint64 {
+	if len(ss) == 0 {
+		return nil
+	}
+
+	var ids = make([]uint64, len(ss))
+	for i := range ss {
+		ids[i] = ss[i].ID()
+	}
+
+	return ids
+}

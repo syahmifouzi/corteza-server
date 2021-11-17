@@ -206,7 +206,7 @@ func (svc workflowConverter) workflowStepDefConv(g *wfexec.Graph, def *types.Wor
 			return svc.convContinueStep()
 
 		case types.WorkflowStepKindSubWorkflow:
-			return svc.convSubWorkflowStep(s, def.ID)
+			return svc.convSubWorkflowStep(s, g, def.ID)
 
 		default:
 			return nil, errors.Internal("unsupported step kind %q", s.Kind)
@@ -376,7 +376,7 @@ func (svc workflowConverter) convFunctionStep(g *wfexec.Graph, s *types.Workflow
 				return nil, nil
 			}
 
-			return types.IteratorStep(def, s.Arguments, s.Results, next, exit)
+			return types.IteratorStep(def, s.Arguments, s.Results, g, next, exit)
 
 		} else {
 			return types.FunctionStep(def, s.Arguments, s.Results)
@@ -476,7 +476,7 @@ func (svc workflowConverter) convDelayStep(s *types.WorkflowStep) (wfexec.Step, 
 
 func (svc workflowConverter) convBreakStep() (wfexec.Step, error) {
 	return wfexec.NewGenericStep(func(ctx context.Context, r *wfexec.ExecRequest) (wfexec.ExecResponse, error) {
-		return wfexec.LoopBreak(), nil
+		return wfexec.ExitBlock(), nil
 	}), nil
 
 }
@@ -488,7 +488,7 @@ func (svc workflowConverter) convContinueStep() (wfexec.Step, error) {
 
 }
 
-func (svc workflowConverter) convSubWorkflowStep(s *types.WorkflowStep, workflowID uint64) (wfexec.Step, error) {
+func (svc workflowConverter) convSubWorkflowStep(s *types.WorkflowStep, g *wfexec.Graph, workflowID uint64) (wfexec.Step, error) {
 	println("preparing sub workflow step")
 	if svc.graphs.handleToID(s.Ref) == 0 {
 		return nil, errors.Internal("non existing or invalid workflow referenced")
@@ -506,6 +506,11 @@ func (svc workflowConverter) convSubWorkflowStep(s *types.WorkflowStep, workflow
 		//
 		//// @todo vv do something with this
 		//_ = stacktrace
+		// svc.graphs
+		//g.Exec()
+
+		// @todo 1) attach subworkflow to graph
+		// @todo 1)
 
 		//return out, err
 		return nil, nil

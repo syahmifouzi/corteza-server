@@ -3,11 +3,12 @@ package types
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/cortezaproject/corteza-server/pkg/expr"
 	"github.com/cortezaproject/corteza-server/pkg/logger"
 	"github.com/cortezaproject/corteza-server/pkg/wfexec"
 	"go.uber.org/zap"
-	"time"
 )
 
 type (
@@ -44,6 +45,7 @@ type (
 
 	iteratorStep struct {
 		wfexec.StepIdentifier
+		g         *wfexec.Graph
 		def       *Function
 		arguments ExprSet
 		results   ExprSet
@@ -125,13 +127,14 @@ func (f functionStep) Exec(ctx context.Context, r *wfexec.ExecRequest) (wfexec.E
 
 // IteratorStep initializes new iterator step with function (iterator) and other parameters
 //
-// Pointers to next and exit steps are are given and then passed on to the iterator
-func IteratorStep(def *Function, arguments, results ExprSet, next, exit wfexec.Step) (*iteratorStep, error) {
+// Pointers to next and exit steps are given and then passed on to the iterator
+func IteratorStep(def *Function, arguments, results ExprSet, g *wfexec.Graph, next, exit wfexec.Step) (*iteratorStep, error) {
 	if def.Kind != FunctionKindIterator {
 		return nil, fmt.Errorf("expecting iterator kind")
 	}
 
 	return &iteratorStep{
+		g:         g,
 		def:       def,
 		arguments: arguments,
 		results:   results,
@@ -182,7 +185,7 @@ func (f *iteratorStep) Exec(ctx context.Context, r *wfexec.ExecRequest) (wfexec.
 		return nil, err
 	}
 
-	return wfexec.GenericIterator(f, f.next, f.exit, ih), nil
+	return wfexec.GenericIterator(f.g, f, ih, r.Scope.MustMerge(r.Input)), nil
 }
 
 // EvalResults is called from iterator's Next() fn.

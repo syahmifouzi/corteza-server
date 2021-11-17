@@ -3,7 +3,8 @@ package wfexec
 import (
 	"context"
 	"fmt"
-	"runtime/debug"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -121,6 +122,7 @@ const (
 	SessionActive SessionStatus = iota
 	SessionPrompted
 	SessionDelayed
+	SessionRecovered
 	SessionFailed
 	SessionCompleted
 )
@@ -146,6 +148,8 @@ func (s SessionStatus) String() string {
 		return "prompted"
 	case SessionDelayed:
 		return "delayed"
+	case SessionRecovered:
+		return "recovered"
 	case SessionFailed:
 		return "failed"
 	case SessionCompleted:
@@ -261,7 +265,7 @@ func (s *Session) Exec(ctx context.Context, step Step, scope *expr.Vars) error {
 		scope, _ = expr.NewVars(nil)
 	}
 
-	return s.enqueue(ctx, NewState(s, auth.GetIdentityFromContext(ctx), nil, step, scope))
+	return s.enqueue(ctx, RootState(s, auth.GetIdentityFromContext(ctx), step, scope))
 }
 
 // UserPendingPrompts prompts fn returns all owner's pending prompts on this session
@@ -338,7 +342,7 @@ func (s *Session) canEnqueue(st *State) error {
 	}
 
 	// when the step is completed right away, it is considered as special
-	if st.step == nil && st.completed == nil {
+	if st.cStep == nil && st.completed == nil {
 		return fmt.Errorf("state step is nil")
 	}
 
@@ -359,7 +363,6 @@ func (s *Session) enqueue(ctx context.Context, st *State) error {
 		return ctx.Err()
 
 	case s.qState <- st:
-		s.log.Debug("add step to queue")
 		return nil
 	}
 }
@@ -438,9 +441,20 @@ func (s *Session) worker(ctx context.Context) {
 				return
 			}
 
-			s.log.Debug("pulled state from queue", zap.Uint64("stateID", st.stateId))
-			if st.step == nil {
-				s.log.Debug("done, setting results and stopping the worker")
+			if st.level() > 10 {
+				panic("too low")
+			}
+
+			log := s.log.With(
+				zap.Uint64("stateID", st.stateId),
+				zap.Uint64("stepId", st.cStep.ID()),
+				zap.Int("depth", st.level()),
+			)
+
+			log.Debug("pulled state from queue")
+
+			if st.traverser == nil {
+				log.Debug("done, setting results and stopping the worker")
 
 				func() {
 					// mini lambda fn to ensure we can properly unlock with defer
@@ -448,7 +462,7 @@ func (s *Session) worker(ctx context.Context) {
 					defer s.mux.Unlock()
 
 					// with merge we are making sure
-					// that result != nil even if state scope is
+					// result != nil even if state scope is
 					s.result = (&expr.Vars{}).MustMerge(st.scope)
 				}()
 
@@ -469,59 +483,46 @@ func (s *Session) worker(ctx context.Context) {
 					<-s.execLock
 				}()
 
-				var (
-					err error
-					log = s.log.With(zap.Uint64("stateID", st.stateId))
-				)
-
 				nxt, err := s.exec(ctx, log, st)
-				if err != nil && st.err == nil {
-					// override the error from the execution
-					st.err = err
-				}
 
-				st.completed = now()
+				if err != nil {
+					log.Debug("is there error to be handled", zap.Error(err))
+					st.pStep = st.cStep
+					st.cStep, err = st.handleError(err)
+					log.Debug("is the error handled", zap.Error(err), zap.Any("ehStep", st.cStep))
+					if err != nil {
+						// wrap the error with workflow and step information
+						err = fmt.Errorf(
+							"workflow %d step %d execution failed: %w",
+							s.workflowID,
+							st.cStep.ID(),
+							err,
+						)
 
-				status := s.Status()
-				if st.err != nil {
-					st.err = fmt.Errorf(
-						"workflow %d step %d execution failed: %w",
-						s.workflowID,
-						st.step.ID(),
-						st.err,
-					)
-
-					s.mux.Lock()
-
-					// when the err handler is defined, the error was handled and should not kill the workflow
-					if !st.errHandled {
 						// We need to force failed session status
 						// because it's not set early enough to pick it up with s.Status()
-						status = SessionFailed
+						s.eventHandler(SessionFailed, st, s)
 
 						// pushing step execution error into error queue
 						// to break worker loop
-						s.qErr <- st.err
+						s.qErr <- err
+						return
 					}
 
-					s.mux.Unlock()
+					// error handed, session recovered
+					s.eventHandler(SessionRecovered, st, s)
+
+					// alter the next states to be handled (since there are no
+					// states from the nxt anymore...
+					nxt = []*State{st}
+
+					log.Debug("next state", zap.Any("step", st.cStep))
 				}
 
-				s.log.Debug(
-					"executed",
-					zap.Uint64("stateID", st.stateId),
-					zap.Stringer("status", status),
-					zap.Error(st.err),
-				)
+				s.eventHandler(s.Status(), st, s)
 
-				s.eventHandler(status, st, s)
-
+				log.Debug("next states?", zap.Int("count", len(nxt)), zap.Any("list", nxt))
 				for _, n := range nxt {
-					if n.step != nil {
-						log.Debug("next step queued", zap.Uint64("nextStepId", n.step.ID()))
-					} else {
-						log.Debug("next step queued", zap.Uint64("nextStepId", 0))
-					}
 					if err = s.enqueue(ctx, n); err != nil {
 						log.Error("unable to enqueue", zap.Error(err))
 						return
@@ -582,7 +583,26 @@ func (s *Session) queueScheduledSuspended() {
 
 // executes single step, resolves response and schedule following steps for execution
 func (s *Session) exec(ctx context.Context, log *zap.Logger, st *State) (nxt []*State, err error) {
-	st.created = *now()
+	//if st.input != nil {
+	//	spew.Dump("st.input:", st.input.Dict())
+	//}
+	//if st.results != nil {
+	//	spew.Dump("st.results:", st.results.Dict())
+	//}
+	//if st.scope != nil {
+	//	spew.Dump("st.scope:", st.scope.Dict())
+	//}
+
+	var (
+		next   Steps
+		result ExecResponse
+
+		// what's the current block?
+		currentBlock = st.traverser
+		// @todo remove currLoop = st.loopCurr()
+
+		scope = (&expr.Vars{}).MustMerge(st.scope)
+	)
 
 	defer func() {
 		reason := recover()
@@ -590,147 +610,189 @@ func (s *Session) exec(ctx context.Context, log *zap.Logger, st *State) (nxt []*
 			return
 		}
 
-		var perr error
+		var (
+			perr error
+			loc  = identifyPanic()
+		)
 
 		// normalize error and set it to state
 		switch reason := reason.(type) {
 		case error:
-			perr = fmt.Errorf("step %d crashed: %w", st.step.ID(), reason)
+			perr = fmt.Errorf("step %d crashed in %s: %w", st.cStep.ID(), loc, reason)
 		default:
-			perr = fmt.Errorf("step %d crashed: %v", st.step.ID(), reason)
+			perr = fmt.Errorf("step %d crashed in %s: %v", st.cStep.ID(), loc, reason)
 		}
 
 		if s.dumpStacktraceOnPanic {
 			fmt.Printf("Error: %v\n", perr)
-			println(string(debug.Stack()))
 		}
 
 		s.qErr <- perr
 	}()
 
-	var (
-		result ExecResponse
-		scope  = (&expr.Vars{}).MustMerge(st.scope)
-
-		currLoop = st.loopCurr()
-	)
-
-	if st.step != nil {
-		log = log.With(zap.Uint64("stepID", st.step.ID()))
-	}
+	//if st.step != nil {
+	log = log.With(zap.Uint64("stepID", st.cStep.ID()))
+	//}
 
 	{
-		if currLoop != nil && currLoop.Is(st.step) {
-			result = currLoop
-		} else {
-			// push logger to context but raise the stacktrace level to panic
-			// to prevent overly verbose traces
-			ctx = logger.ContextWithValue(ctx, log)
 
-			// Context received in exec() wil not have the identity we're expecting
-			// so we need to pull it from state owner and add it to new context
-			// that is set to step exec function
-			stepCtx := auth.SetIdentityToContext(ctx, st.owner)
-			stepCtx = SetContextCallStack(stepCtx, s.callStack)
+		//if inBlock != nil && inBlock.Initiator(st.step) {
+		//	result = inBlock
+		//	// @todo remove } else if currLoop != nil && currLoop.Is(st.step) {
+		//	// @todo remove 	result = currLoop
+		//} else {
+		// push logger to context but raise the stacktrace level to panic
+		// to prevent overly verbose traces
+		ctx = logger.ContextWithValue(ctx, log)
 
-			result, st.err = st.step.Exec(stepCtx, st.MakeRequest())
+		// Context received in exec() wil not have the identity we're expecting
+		// we need to pull it from state owner and add it to new context
+		// that is set to step exec function
+		stepCtx := auth.SetIdentityToContext(ctx, st.owner)
+		stepCtx = SetContextCallStack(stepCtx, s.callStack)
 
-			if iterator, isIterator := result.(Iterator); isIterator && st.err == nil {
-				// Exec fn returned an iterator, adding loop to stack
-				st.newLoop(iterator)
-				if err = iterator.Start(ctx, scope); err != nil {
-					return
-				}
-			}
+		//result, st.err = st.cStep.Exec(stepCtx, st.MakeRequest())
+		if result, err = st.cStep.Exec(stepCtx, st.MakeRequest()); err != nil {
+			return nil, err
 		}
 
-		if st.err != nil {
-			if st.errHandler == nil {
-				// no error handler set
-				return nil, st.err
-			}
+		//if iterator, isIterator := result.(Iterator); isIterator && st.err == nil {
+		//	// Exec fn returned an iterator, adding loop to stack
+		//	st.newLoop(iterator)
+		//	if err = iterator.Start(ctx, scope); err != nil {
+		//		return
+		//	}
+		//}
+		//if sub, is := result.(block); is {
+		//	st.blockStack = append(st.blockStack, sub)
+		//	currentBlock = sub
+		//}
+		//}
 
-			// handling error with error handling
-			// step set in one of the previous steps
-			log.Warn("step execution error handled",
-				zap.Uint64("errorHandlerStepId", st.errHandler.ID()),
-				zap.Error(st.err),
-			)
+		//if st.err != nil {
+		//	if st.errHandler == nil {
+		//		// no error handler set
+		//		return nil, st.err
+		//	}
+		//
+		//	// handling error with error handling
+		//	// step set in one of the previous steps
+		//	log.Warn("step execution error handled",
+		//		zap.Uint64("errorHandlerStepId", st.errHandler.ID()),
+		//		zap.Error(st.err),
+		//	)
+		//
+		//	_ = expr.Assign(scope, "error", expr.Must(expr.NewString(st.err.Error())))
+		//
+		//	// copy error handler & disable it on state to prevent inf. loop
+		//	// in case of another error in the error-handling branch
+		//	eh := st.errHandler
+		//	st.errHandler = nil
+		//	st.errHandled = true
+		//	return []*State{st.Next(eh, scope)}, nil
+		//}
 
-			_ = expr.Assign(scope, "error", expr.Must(expr.NewString(st.err.Error())))
+		// respect step's request to go into a new block
+		//switch b := result.(type) {
+		//case block:
+		//	//st.action = "new block on stack"
+		//	// add looper to state
+		//	//var (
+		//	//	n Step
+		//	//)
+		//	if st.err = b.Init(); st.err != nil {
+		//		return nil, st.err
+		//	}
+		//
+		//	// complete this exec and start with the substate & subblock
+		//	return []*State{st.Block(b, scope)}, nil
+		//	//b.FirstStep()
+		//	//
+		//	//n, result, st.err = b.FirstStep().Exec(ctx, scope)
+		//	//if st.err != nil {
+		//	//	return nil, st.err
+		//	//}
+		//	//
+		//	//if n == nil {
+		//	//	st.next = st.loopEnd()
+		//	//} else {
+		//	//	st.next = Steps{n}
+		//	//}
+		//	//case Iterator:
+		//	//	st.action = "iterator initialized"
+		//	//	// add looper to state
+		//	//	var (
+		//	//		n Step
+		//	//	)
+		//	//	n, result, st.err = l.Next(ctx, scope)
+		//	//	if st.err != nil {
+		//	//		return nil, st.err
+		//	//	}
+		//	//
+		//	//	if n == nil {
+		//	//		st.next = st.loopEnd()
+		//	//	} else {
+		//	//		st.next = Steps{n}
+		//	//	}
+		//}
 
-			// copy error handler & disable it on state to prevent inf. loop
-			// in case of another error in the error-handling branch
-			eh := st.errHandler
-			st.errHandler = nil
-			st.errHandled = true
-			return []*State{st.Next(eh, scope)}, nil
-		}
-
-		switch l := result.(type) {
-		case Iterator:
-			st.action = "iterator initialized"
-			// add looper to state
-			var (
-				n Step
-			)
-			n, result, st.err = l.Next(ctx, scope)
-			if st.err != nil {
-				return nil, st.err
-			}
-
-			if n == nil {
-				st.next = st.loopEnd()
-			} else {
-				st.next = Steps{n}
-			}
-			//executes subroutine within a same session
-			//case *sub:
-			//	result, st.err = l.Exec(ctx, s, scope)
-		}
-
-		log.Debug("step executed", zap.String("resultType", fmt.Sprintf("%T", result)))
+		log.Debug(
+			"step executed",
+			zap.String("resultType", fmt.Sprintf("%T", result)),
+		)
 		switch result := result.(type) {
+		//case *errHandler:
+		//	st.action = "error handler initialized"
+		//	// this step sets error handling step on current state
+		//	// and continues on the current path
+		//	//st.errHandler = result.handler
+		//	st.enterBlock(result)
+		//	st.next, err = result.Next(ctx, st.step)
+		//	if err != nil {
+		//		return
+		//	}
+		//
+		//	return []*State{st}, nil
+		//
+		//	// find step that's not error handler and
+		//	// use it for the next step
+		//	// @todo rework this and do error-handling through "block"
+		//	//for _, c := range currentBlock.NextStep() {
+		//	//	if c != st.errHandler {
+		//	//		st.next = Steps{c}
+		//	//		break
+		//	//	}
+		//	//}
+		//	//panic("error handling is pending reimplementation")
+
+		case block:
+			// Push state
+			log.Debug("new block")
+			st = st.withTraverser(result)
+
 		case *expr.Vars:
 			// most common (successful) result
 			// session will continue with configured child steps
 			st.results = result
 			scope = scope.MustMerge(st.results)
 
-		case *errHandler:
-			st.action = "error handler initialized"
-			// this step sets error handling step on current state
-			// and continues on the current path
-			st.errHandler = result.handler
-
-			// find step that's not error handler and
-			// use it for the next step
-			for _, c := range s.g.Children(st.step) {
-				if c != st.errHandler {
-					st.next = Steps{c}
-					break
-				}
-			}
-
-		case *loopBreak:
-			st.action = "loop break"
-			if currLoop == nil {
-				return nil, fmt.Errorf("break step not inside a loop")
-			}
+		case *exitBlock:
+			st.action = "block break"
 
 			// jump out of the loop
-			st.next = st.loopEnd()
-			log.Debug("breaking from iterator")
+			st, st.results = st.exit()
+			log.Debug("breaking from block")
 
 		case *loopContinue:
-			st.action = "loop continue"
-			if currLoop == nil {
-				return nil, fmt.Errorf("continue step not inside a loop")
-			}
+			if itr, is := currentBlock.(iterator); !is {
+				return nil, fmt.Errorf("block is not an iterator")
+			} else {
+				st.action = "loop continue"
 
-			// jump back to iterator
-			st.next = Steps{currLoop.Iterator()}
-			log.Debug("continuing with next iteration")
+				// jump back to iterator step
+				next = Steps{itr.Continue()}
+				log.Debug("continuing with next iteration")
+			}
 
 		case *partial:
 			st.action = "partial"
@@ -744,8 +806,13 @@ func (s *Session) exec(ctx context.Context, log *zap.Logger, st *State) (nxt []*
 			log.Debug("termination", zap.Int("delayed", len(s.delayed)))
 			s.mux.Lock()
 			s.delayed = nil
+
+			// @todo -- should remove all prompts as well?
+			//s.prompted = nil
 			s.mux.Unlock()
-			return []*State{FinalState(s, scope)}, nil
+
+			st.terminate()
+			return []*State{st}, nil
 
 		case *delayed:
 			st.action = "delayed"
@@ -755,6 +822,8 @@ func (s *Session) exec(ctx context.Context, log *zap.Logger, st *State) (nxt []*
 			s.mux.Lock()
 			s.delayed[st.stateId] = result
 			s.mux.Unlock()
+
+			// execution will be resumed after the delay
 			return
 
 		case *resumed:
@@ -764,71 +833,94 @@ func (s *Session) exec(ctx context.Context, log *zap.Logger, st *State) (nxt []*
 		case *prompted:
 			st.action = "prompted"
 			if result.ownerId == 0 {
-				return nil, fmt.Errorf("without an owner")
+				return nil, fmt.Errorf("prompt without an owner")
 			}
 
 			result.state = st
 			s.mux.Lock()
 			s.prompted[st.stateId] = result
 			s.mux.Unlock()
+
+			// execution will be resumed after the prompt response
 			return
 
 		case Steps:
 			st.action = "next-steps"
 			// session continues with set of specified steps
 			// steps MUST be configured in a graph as step's children
-			st.next = result
+			next = result
 
 		case Step:
 			st.action = "next-step"
 			// session continues with a specified step
 			// step MUST be configured in a graph as step's child
-			st.next = Steps{result}
+			next = Steps{result}
 
 		default:
 			return nil, fmt.Errorf("unknown exec response type %T", result)
 		}
 	}
 
-	if len(st.next) == 0 {
-		// step's exec did not return next steps (only gateway steps, iterators and loops controls usually do that)
-		//
-		// rely on graph and get next (children) steps from there
-		st.next = s.g.Children(st.step)
+	//if len(next) == 0 {
+	//	// step's exec did not return next steps (only gateway steps, iterators and loops controls usually do that)
+	//	//
+	//	// rely on graph and get next (children) steps from there
+	//	if next, err = currentBlock.Next(ctx, st.cStep); err != nil {
+	//		return nil, err
+	//	}
+	//}
+
+	log.Debug("scope", zap.Any("scope", scope.Dict()))
+	st.scope = scope
+
+	if len(next) == 0 {
+		next, err = st.traverser.Next(ctx, st.cStep)
+		log.Debug("next from traversal", zap.Any("step", next), zap.Error(err))
+		if err != nil {
+			return nil, err
+		}
 	} else {
+		log.Debug("checking next steps", zap.Any("steps", next), zap.Error(err))
 		// children returned from step's exec
 		// do a quick sanity check
-		cc := s.g.Children(st.step)
-		if len(cc) > 0 && !cc.Contains(st.next...) {
+		cc := st.traverser.Children(st.cStep)
+		if len(cc) > 0 && !cc.Contains(next...) {
 			return nil, fmt.Errorf("inconsistent relationship")
 		}
 	}
 
-	if currLoop != nil && len(st.next) == 0 {
-		// gracefully handling last step of iteration branch
-		// that does not point back to the iterator step
-		st.next = Steps{currLoop.Iterator()}
-		log.Debug("last step in iteration branch, going back", zap.Uint64("backStepId", st.next[0].ID()))
-	}
+	//if len(st.next) == 0 && currentBlock.IsLoop() {
+	//	// gracefully handling last step of iteration branch
+	//	// that does not point back to the iterator step
+	//	st.next = Steps{currentBlock.FirstStep()}
+	//	log.Debug("last step in iteration branch, going back", zap.Uint64("backStepId", st.next[0].ID()))
+	//}
 
-	if len(st.next) == 0 {
-		log.Debug("zero paths, finalizing")
+	if len(next) == 0 {
+		log.Debug("zero paths, finalizing", zap.Any("scope", scope.Dict()))
 		// using state to transport results and complete the worker loop
-		return []*State{FinalState(s, scope)}, nil
+		st.terminate()
+		return []*State{st}, nil
 	}
 
-	nxt = make([]*State, len(st.next))
-	for i, step := range st.next {
-		nn := st.Next(step, scope)
-		if err = s.canEnqueue(nn); err != nil {
-			log.Error("unable to queue", zap.Error(err))
-			return
-		}
+	log.Debug("forking", zap.Int("children", len(next)), zap.Any("scope", scope.Dict()))
+	return st.next(next...), nil
 
-		nxt[i] = nn
-	}
-
-	return nxt, nil
+	//for _, st = range st.fork(next...) {
+	//	if err = s.canEnqueue(st); err != nil {
+	//		log.Error("unable to queue", zap.Error(err))
+	//		return
+	//	}
+	//
+	//	nxt[i] = nn
+	//
+	//}
+	//
+	//nxt = make([]*State, len(next))
+	//for i, step := range next {
+	//}
+	//
+	//return nxt, nil
 }
 
 func SetWorkerInterval(i time.Duration) SessionOpt {
@@ -867,39 +959,6 @@ func SetCallStack(id ...uint64) SessionOpt {
 	}
 }
 
-func (ss Steps) hash() map[Step]bool {
-	out := make(map[Step]bool)
-	for _, s := range ss {
-		out[s] = true
-	}
-
-	return out
-}
-
-func (ss Steps) Contains(steps ...Step) bool {
-	hash := ss.hash()
-	for _, s1 := range steps {
-		if !hash[s1] {
-			return false
-		}
-	}
-
-	return true
-}
-
-func (ss Steps) IDs() []uint64 {
-	if len(ss) == 0 {
-		return nil
-	}
-
-	var ids = make([]uint64, len(ss))
-	for i := range ss {
-		ids[i] = ss[i].ID()
-	}
-
-	return ids
-}
-
 func SetContextCallStack(ctx context.Context, ss []uint64) context.Context {
 	return context.WithValue(ctx, callStackCtxKey{}, ss)
 }
@@ -911,4 +970,32 @@ func GetContextCallStack(ctx context.Context) []uint64 {
 	}
 
 	return v.([]uint64)
+}
+
+func identifyPanic() string {
+	var name, file string
+	var line int
+	var pc [16]uintptr
+
+	n := runtime.Callers(3, pc[:])
+	for _, pc := range pc[:n] {
+		fn := runtime.FuncForPC(pc)
+		if fn == nil {
+			continue
+		}
+		file, line = fn.FileLine(pc)
+		name = fn.Name()
+		if !strings.HasPrefix(name, "runtime.") {
+			break
+		}
+	}
+
+	switch {
+	case name != "":
+		return fmt.Sprintf("%v:%v", name, line)
+	case file != "":
+		return fmt.Sprintf("%v:%v", file, line)
+	}
+
+	return fmt.Sprintf("pc:%x", pc)
 }

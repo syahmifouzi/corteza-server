@@ -8,10 +8,6 @@ type (
 	ExecResponse interface{}
 	partial      struct{}
 
-	errHandler struct {
-		handler Step
-	}
-
 	termination struct{}
 
 	delayed struct {
@@ -35,18 +31,15 @@ func Resume() *resumed {
 	return &resumed{}
 }
 
-func ErrorHandler(h Step) *errHandler {
-	return &errHandler{handler: h}
-}
-
 func Termination() *termination {
 	return &termination{}
 }
 
 type (
-	loopBreak    struct{}
+	exitBlock struct{}
+	//loopBreak    struct{}
 	loopContinue struct{}
 )
 
-func LoopBreak() *loopBreak       { return &loopBreak{} }
+func ExitBlock() *exitBlock       { return &exitBlock{} }
 func LoopContinue() *loopContinue { return &loopContinue{} }

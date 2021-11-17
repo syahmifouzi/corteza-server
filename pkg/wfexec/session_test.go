@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cortezaproject/corteza-server/pkg/expr"
+	"github.com/cortezaproject/corteza-server/pkg/logger"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/atomic"
 )
@@ -14,7 +15,7 @@ import (
 type (
 	sesTestStep struct {
 		StepIdentifier
-		name string
+		Name string
 		exec func(context.Context, *ExecRequest) (ExecResponse, error)
 	}
 
@@ -28,7 +29,15 @@ type (
 var (
 	// used for testing to produce lower numbers that are easier to inspect and compare
 	testID = atomic.NewUint64(0)
+
+	counter = atomic.NewUint64(20001)
 )
+
+func init() {
+	nextID = func() uint64 {
+		return counter.Inc()
+	}
+}
 
 func (s *sesTestStep) Exec(ctx context.Context, r *ExecRequest) (ExecResponse, error) {
 	if s.exec != nil {
@@ -48,8 +57,8 @@ func (s *sesTestStep) Exec(ctx context.Context, r *ExecRequest) (ExecResponse, e
 
 	return expr.NewVars(map[string]interface{}{
 		"counter": args.Counter + 1,
-		"path":    args.Path + "/" + s.name,
-		s.name:    "executed",
+		"path":    args.Path + "/" + s.Name,
+		s.Name:    "executed",
 	})
 }
 
@@ -74,8 +83,8 @@ func TestSession_TwoStepWorkflow(t *testing.T) {
 		wf  = NewGraph()
 		ses = NewSession(ctx, wf)
 
-		s1 = &sesTestStep{name: "s1"}
-		s2 = &sesTestStep{name: "s2"}
+		s1 = &sesTestStep{Name: "s1"}
+		s2 = &sesTestStep{Name: "s2"}
 
 		scope = &expr.Vars{}
 	)
@@ -98,10 +107,10 @@ func TestSession_SplitAndMerge(t *testing.T) {
 		wf  = NewGraph()
 		ses = NewSession(ctx, wf, SetDumpStacktraceOnPanic(true))
 
-		start  = &sesTestStep{name: "start"}
-		split1 = &sesTestStep{name: "split1"}
-		split2 = &sesTestStep{name: "split2"}
-		split3 = &sesTestStep{name: "split3"}
+		start  = &sesTestStep{Name: "start"}
+		split1 = &sesTestStep{Name: "split1"}
+		split2 = &sesTestStep{Name: "split2"}
+		split3 = &sesTestStep{Name: "split3"}
 
 		end = JoinGateway(split1, split2, split3)
 	)
@@ -138,12 +147,12 @@ func TestSession_Delays(t *testing.T) {
 			SetWorkerInterval(unit),
 		)
 
-		start = &sesTestStep{name: "start"}
+		start = &sesTestStep{Name: "start"}
 
 		waitForMoment = &sesTestTemporal{delay: delay}
 
 		waitForInputStateId atomic.Uint64
-		waitForInput        = &sesTestStep{name: "waitForInput", exec: func(ctx context.Context, r *ExecRequest) (ExecResponse, error) {
+		waitForInput        = &sesTestStep{Name: "waitForInput", exec: func(ctx context.Context, r *ExecRequest) (ExecResponse, error) {
 			if !r.Input.Has("input") {
 				waitForInputStateId.Store(r.StateID)
 				return Prompt(0, "", nil), nil
@@ -203,48 +212,56 @@ func TestSession_ErrHandler(t *testing.T) {
 			wf,
 
 			// enable if you need to see what is going on
-			//SetLogger(logger.MakeDebugLogger()),
+			SetLogger(logger.MakeDebugLogger()),
 
-			// enable if you need to see what is going on
+			//// enable if you need to see what is going on
 			//SetHandler(func(status SessionStatus, state *State, session *Session) {
-			//	if state.step != nil {
-			//		println(state.step.(*sesTestStep).name)
+			//	if state != nil && state.cStep != nil {
+			//		println(status.String(), state.cStep.(*sesTestStep).name, state.action)
+			//	} else {
+			//		println(status.String())
 			//	}
 			//}),
 		)
 
-		cb_1_1 = &sesTestStep{name: "catch-branch-1-1"}
-		cb_1_2 = &sesTestStep{name: "catch-branch-1-2"}
-		tb_1_1 = &sesTestStep{name: "try-branch-1-1"}
+		cb_1_1 = &sesTestStep{Name: "catch-branch-1-1"}
+		cb_1_2 = &sesTestStep{Name: "catch-branch-1-2"}
+		tb_1_1 = &sesTestStep{Name: "try-branch-1-1"}
 
-		eh_1 = &sesTestStep{name: "err-handler", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
-			return ErrorHandler(cb_1_1), nil
+		eh_1 = &sesTestStep{Name: "err-handler-1", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
+			return ErrorHandler(wf, cb_1_1), nil
 		}}
-		er_1 = &sesTestStep{name: "err-raiser", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
-			return nil, fmt.Errorf("would-be-handled-error")
+		er_1 = &sesTestStep{Name: "err-raiser-1", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
+			return nil, fmt.Errorf("would-be-handled-error-1")
 		}}
 
-		cb_2_1 = &sesTestStep{name: "catch-branch-2-1"}
-		cb_2_2 = &sesTestStep{name: "catch-branch-2-2"}
-		tb_2_1 = &sesTestStep{name: "try-branch-2-1"}
+		cb_2_1 = &sesTestStep{Name: "catch-branch-2-1"}
+		cb_2_2 = &sesTestStep{Name: "catch-branch-2-2"}
+		tb_2_1 = &sesTestStep{Name: "try-branch-2-1"}
 
-		eh_2 = &sesTestStep{name: "err-handler", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
-			return ErrorHandler(cb_2_1), nil
+		eh_2 = &sesTestStep{Name: "err-handler-2", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
+			return ErrorHandler(wf, cb_2_1), nil
 		}}
-		er_2 = &sesTestStep{name: "err-raiser", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
-			return nil, fmt.Errorf("would-be-handled-error")
+		er_2 = &sesTestStep{Name: "err-raiser-2", exec: func(ctx context.Context, request *ExecRequest) (ExecResponse, error) {
+			return nil, fmt.Errorf("would-be-handled-error-2")
 		}}
 	)
 
 	wf.AddStep(eh_1, tb_1_1)   // error handling step (entrypoint!)
-	wf.AddStep(tb_1_1)         // add try step
 	wf.AddStep(tb_1_1, er_1)   // add  error raising step right after 1st step in try branch
+	wf.AddStep(er_1)           // error raiser
 	wf.AddStep(cb_1_1, cb_1_2) // catch branch step 1 & 2
 
 	wf.AddStep(cb_1_2, eh_2)   // 2nd error handling step right after 1st catch branch
 	wf.AddStep(eh_2, tb_2_1)   // step in try branch
 	wf.AddStep(tb_2_1, er_2)   // 2nd error raising step on 2nd try branch
 	wf.AddStep(cb_2_1, cb_2_2) // 2nd catch branch step 1 & 2
+	wf.AddStep(cb_2_2)
+
+	for _, s := range wf.steps {
+		s.SetID(nextID())
+		t.Logf("%d\t%s\n", s.ID(), s.(*sesTestStep).Name)
+	}
 
 	req.NoError(ses.Exec(ctx, eh_1, nil))
 
@@ -263,8 +280,8 @@ func TestSession_ExecStepWithParents(t *testing.T) {
 		wf  = NewGraph()
 		ses = NewSession(ctx, wf)
 
-		p = &sesTestStep{name: "p"}
-		c = &sesTestStep{name: "c"}
+		p = &sesTestStep{Name: "p"}
+		c = &sesTestStep{Name: "c"}
 	)
 
 	wf.AddStep(p, c)
@@ -283,7 +300,7 @@ func bmSessionSimpleStepSequence(c uint64, b *testing.B) {
 	)
 
 	for i := uint64(1); i <= c; i++ {
-		s := &sesTestStep{name: "start"}
+		s := &sesTestStep{Name: "start"}
 		s.SetID(i)
 		g.AddStep(s)
 		if i > 1 {
