@@ -3,20 +3,29 @@ package types
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"time"
+
+	"github.com/cortezaproject/corteza-server/compose/crs/capabilities"
 	discovery "github.com/cortezaproject/corteza-server/discovery/types"
 	"github.com/cortezaproject/corteza-server/pkg/filter"
 	"github.com/cortezaproject/corteza-server/pkg/locale"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type (
+	CRSDef struct {
+		ComposeRecordStoreID uint64
+		Capabilities         capabilities.Set
+	}
+
 	Module struct {
 		ID     uint64         `json:"moduleID,string"`
 		Handle string         `json:"handle"`
 		Meta   types.JSONText `json:"meta"`
 		Fields ModuleFieldSet `json:"fields"`
+
+		Store CRSDef
 
 		Labels map[string]string `json:"labels,omitempty"`
 
