@@ -80,7 +80,7 @@ func (s Store) CreateActionlog(ctx context.Context, rr ...*actionlogType.Action)
 			return
 		}
 
-		if err = s.Exec(ctx, actionlogInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, actionlogInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -97,7 +97,7 @@ func (s Store) UpdateActionlog(ctx context.Context, rr ...*actionlogType.Action)
 			return
 		}
 
-		if err = s.Exec(ctx, actionlogUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, actionlogUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -114,7 +114,7 @@ func (s Store) UpsertActionlog(ctx context.Context, rr ...*actionlogType.Action)
 			return
 		}
 
-		if err = s.Exec(ctx, actionlogUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, actionlogUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -127,7 +127,7 @@ func (s Store) UpsertActionlog(ctx context.Context, rr ...*actionlogType.Action)
 // This function is auto-generated
 func (s Store) DeleteActionlog(ctx context.Context, rr ...*actionlogType.Action) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, actionlogDeleteQuery(s.config.Dialect, actionlogPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, actionlogDeleteQuery(s.Dialect, actionlogPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -139,14 +139,14 @@ func (s Store) DeleteActionlog(ctx context.Context, rr ...*actionlogType.Action)
 //
 // This function is auto-generated
 func (s Store) DeleteActionlogByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, actionlogDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, actionlogDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateActionlogs Deletes all rows from the actionlog collection
 func (s Store) TruncateActionlogs(ctx context.Context) error {
-	return s.Exec(ctx, actionlogTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, actionlogTruncateQuery(s.Dialect))
 }
 
 // SearchActionlogs returns (filtered) set of Actionlogs
@@ -175,7 +175,7 @@ func (s Store) QueryActionlogs(
 	var (
 		set         = make([]*actionlogType.Action, 0, DefaultSliceCapacity)
 		res         *actionlogType.Action
-		aux         auxActionlog
+		aux         *auxActionlog
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -183,9 +183,9 @@ func (s Store) QueryActionlogs(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Actionlog != nil {
+	if s.Filters.Actionlog != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Actionlog(f)
+		tExpr, f, err = s.Filters.Actionlog(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ActionlogFilter(f)
@@ -198,7 +198,7 @@ func (s Store) QueryActionlogs(
 
 	expr = append(expr, tExpr...)
 
-	query := actionlogSelectQuery(s.config.Dialect).Where(expr...)
+	query := actionlogSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableActionlogFields()); err != nil {
@@ -239,6 +239,7 @@ func (s Store) QueryActionlogs(
 			return
 		}
 
+		aux = new(auxActionlog)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Actionlog: %w", err)
 			return
@@ -264,7 +265,7 @@ func (s Store) LookupActionlogByID(ctx context.Context, id uint64) (_ *actionlog
 	var (
 		rows   *sql.Rows
 		aux    = new(auxActionlog)
-		lookup = actionlogSelectQuery(s.config.Dialect).Where(
+		lookup = actionlogSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -370,7 +371,7 @@ func (s Store) CreateApigwFilter(ctx context.Context, rr ...*systemType.ApigwFil
 			return
 		}
 
-		if err = s.Exec(ctx, apigwFilterInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, apigwFilterInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -387,7 +388,7 @@ func (s Store) UpdateApigwFilter(ctx context.Context, rr ...*systemType.ApigwFil
 			return
 		}
 
-		if err = s.Exec(ctx, apigwFilterUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, apigwFilterUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -404,7 +405,7 @@ func (s Store) UpsertApigwFilter(ctx context.Context, rr ...*systemType.ApigwFil
 			return
 		}
 
-		if err = s.Exec(ctx, apigwFilterUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, apigwFilterUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -417,7 +418,7 @@ func (s Store) UpsertApigwFilter(ctx context.Context, rr ...*systemType.ApigwFil
 // This function is auto-generated
 func (s Store) DeleteApigwFilter(ctx context.Context, rr ...*systemType.ApigwFilter) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, apigwFilterDeleteQuery(s.config.Dialect, apigwFilterPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, apigwFilterDeleteQuery(s.Dialect, apigwFilterPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -429,14 +430,14 @@ func (s Store) DeleteApigwFilter(ctx context.Context, rr ...*systemType.ApigwFil
 //
 // This function is auto-generated
 func (s Store) DeleteApigwFilterByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, apigwFilterDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, apigwFilterDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateApigwFilters Deletes all rows from the apigwFilter collection
 func (s Store) TruncateApigwFilters(ctx context.Context) error {
-	return s.Exec(ctx, apigwFilterTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, apigwFilterTruncateQuery(s.Dialect))
 }
 
 // SearchApigwFilters returns (filtered) set of ApigwFilters
@@ -628,7 +629,7 @@ func (s Store) QueryApigwFilters(
 
 		set         = make([]*systemType.ApigwFilter, 0, DefaultSliceCapacity)
 		res         *systemType.ApigwFilter
-		aux         auxApigwFilter
+		aux         *auxApigwFilter
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -636,9 +637,9 @@ func (s Store) QueryApigwFilters(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ApigwFilter != nil {
+	if s.Filters.ApigwFilter != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ApigwFilter(f)
+		tExpr, f, err = s.Filters.ApigwFilter(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ApigwFilterFilter(f)
@@ -660,7 +661,7 @@ func (s Store) QueryApigwFilters(
 		}
 	}
 
-	query := apigwFilterSelectQuery(s.config.Dialect).Where(expr...)
+	query := apigwFilterSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableApigwFilterFields()); err != nil {
@@ -701,6 +702,7 @@ func (s Store) QueryApigwFilters(
 			return
 		}
 
+		aux = new(auxApigwFilter)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ApigwFilter: %w", err)
 			return
@@ -736,7 +738,7 @@ func (s Store) LookupApigwFilterByID(ctx context.Context, id uint64) (_ *systemT
 	var (
 		rows   *sql.Rows
 		aux    = new(auxApigwFilter)
-		lookup = apigwFilterSelectQuery(s.config.Dialect).Where(
+		lookup = apigwFilterSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -776,7 +778,7 @@ func (s Store) LookupApigwFilterByRoute(ctx context.Context, route uint64) (_ *s
 	var (
 		rows   *sql.Rows
 		aux    = new(auxApigwFilter)
-		lookup = apigwFilterSelectQuery(s.config.Dialect).Where(
+		lookup = apigwFilterSelectQuery(s.Dialect).Where(
 			goqu.I("rel_route").Eq(route),
 		).Limit(1)
 	)
@@ -891,7 +893,7 @@ func (s Store) CreateApigwRoute(ctx context.Context, rr ...*systemType.ApigwRout
 			return
 		}
 
-		if err = s.Exec(ctx, apigwRouteInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, apigwRouteInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -908,7 +910,7 @@ func (s Store) UpdateApigwRoute(ctx context.Context, rr ...*systemType.ApigwRout
 			return
 		}
 
-		if err = s.Exec(ctx, apigwRouteUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, apigwRouteUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -925,7 +927,7 @@ func (s Store) UpsertApigwRoute(ctx context.Context, rr ...*systemType.ApigwRout
 			return
 		}
 
-		if err = s.Exec(ctx, apigwRouteUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, apigwRouteUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -938,7 +940,7 @@ func (s Store) UpsertApigwRoute(ctx context.Context, rr ...*systemType.ApigwRout
 // This function is auto-generated
 func (s Store) DeleteApigwRoute(ctx context.Context, rr ...*systemType.ApigwRoute) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, apigwRouteDeleteQuery(s.config.Dialect, apigwRoutePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, apigwRouteDeleteQuery(s.Dialect, apigwRoutePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -950,14 +952,14 @@ func (s Store) DeleteApigwRoute(ctx context.Context, rr ...*systemType.ApigwRout
 //
 // This function is auto-generated
 func (s Store) DeleteApigwRouteByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, apigwRouteDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, apigwRouteDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateApigwRoutes Deletes all rows from the apigwRoute collection
 func (s Store) TruncateApigwRoutes(ctx context.Context) error {
-	return s.Exec(ctx, apigwRouteTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, apigwRouteTruncateQuery(s.Dialect))
 }
 
 // SearchApigwRoutes returns (filtered) set of ApigwRoutes
@@ -1149,7 +1151,7 @@ func (s Store) QueryApigwRoutes(
 
 		set         = make([]*systemType.ApigwRoute, 0, DefaultSliceCapacity)
 		res         *systemType.ApigwRoute
-		aux         auxApigwRoute
+		aux         *auxApigwRoute
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -1157,9 +1159,9 @@ func (s Store) QueryApigwRoutes(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ApigwRoute != nil {
+	if s.Filters.ApigwRoute != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ApigwRoute(f)
+		tExpr, f, err = s.Filters.ApigwRoute(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ApigwRouteFilter(f)
@@ -1181,7 +1183,7 @@ func (s Store) QueryApigwRoutes(
 		}
 	}
 
-	query := apigwRouteSelectQuery(s.config.Dialect).Where(expr...)
+	query := apigwRouteSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableApigwRouteFields()); err != nil {
@@ -1222,6 +1224,7 @@ func (s Store) QueryApigwRoutes(
 			return
 		}
 
+		aux = new(auxApigwRoute)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ApigwRoute: %w", err)
 			return
@@ -1259,7 +1262,7 @@ func (s Store) LookupApigwRouteByID(ctx context.Context, id uint64) (_ *systemTy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxApigwRoute)
-		lookup = apigwRouteSelectQuery(s.config.Dialect).Where(
+		lookup = apigwRouteSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -1301,7 +1304,7 @@ func (s Store) LookupApigwRouteByEndpoint(ctx context.Context, endpoint string) 
 	var (
 		rows   *sql.Rows
 		aux    = new(auxApigwRoute)
-		lookup = apigwRouteSelectQuery(s.config.Dialect).Where(
+		lookup = apigwRouteSelectQuery(s.Dialect).Where(
 			goqu.I("endpoint").Eq(endpoint),
 		).Limit(1)
 	)
@@ -1416,7 +1419,7 @@ func (s Store) CreateApplication(ctx context.Context, rr ...*systemType.Applicat
 			return
 		}
 
-		if err = s.Exec(ctx, applicationInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, applicationInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -1433,7 +1436,7 @@ func (s Store) UpdateApplication(ctx context.Context, rr ...*systemType.Applicat
 			return
 		}
 
-		if err = s.Exec(ctx, applicationUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, applicationUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -1450,7 +1453,7 @@ func (s Store) UpsertApplication(ctx context.Context, rr ...*systemType.Applicat
 			return
 		}
 
-		if err = s.Exec(ctx, applicationUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, applicationUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -1463,7 +1466,7 @@ func (s Store) UpsertApplication(ctx context.Context, rr ...*systemType.Applicat
 // This function is auto-generated
 func (s Store) DeleteApplication(ctx context.Context, rr ...*systemType.Application) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, applicationDeleteQuery(s.config.Dialect, applicationPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, applicationDeleteQuery(s.Dialect, applicationPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -1475,14 +1478,14 @@ func (s Store) DeleteApplication(ctx context.Context, rr ...*systemType.Applicat
 //
 // This function is auto-generated
 func (s Store) DeleteApplicationByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, applicationDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, applicationDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateApplications Deletes all rows from the application collection
 func (s Store) TruncateApplications(ctx context.Context) error {
-	return s.Exec(ctx, applicationTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, applicationTruncateQuery(s.Dialect))
 }
 
 // SearchApplications returns (filtered) set of Applications
@@ -1674,7 +1677,7 @@ func (s Store) QueryApplications(
 
 		set         = make([]*systemType.Application, 0, DefaultSliceCapacity)
 		res         *systemType.Application
-		aux         auxApplication
+		aux         *auxApplication
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -1682,9 +1685,9 @@ func (s Store) QueryApplications(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Application != nil {
+	if s.Filters.Application != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Application(f)
+		tExpr, f, err = s.Filters.Application(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ApplicationFilter(f)
@@ -1706,7 +1709,7 @@ func (s Store) QueryApplications(
 		}
 	}
 
-	query := applicationSelectQuery(s.config.Dialect).Where(expr...)
+	query := applicationSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableApplicationFields()); err != nil {
@@ -1747,6 +1750,7 @@ func (s Store) QueryApplications(
 			return
 		}
 
+		aux = new(auxApplication)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Application: %w", err)
 			return
@@ -1784,7 +1788,7 @@ func (s Store) LookupApplicationByID(ctx context.Context, id uint64) (_ *systemT
 	var (
 		rows   *sql.Rows
 		aux    = new(auxApplication)
-		lookup = applicationSelectQuery(s.config.Dialect).Where(
+		lookup = applicationSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -1899,7 +1903,7 @@ func (s Store) CreateAttachment(ctx context.Context, rr ...*systemType.Attachmen
 			return
 		}
 
-		if err = s.Exec(ctx, attachmentInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, attachmentInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -1916,7 +1920,7 @@ func (s Store) UpdateAttachment(ctx context.Context, rr ...*systemType.Attachmen
 			return
 		}
 
-		if err = s.Exec(ctx, attachmentUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, attachmentUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -1933,7 +1937,7 @@ func (s Store) UpsertAttachment(ctx context.Context, rr ...*systemType.Attachmen
 			return
 		}
 
-		if err = s.Exec(ctx, attachmentUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, attachmentUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -1946,7 +1950,7 @@ func (s Store) UpsertAttachment(ctx context.Context, rr ...*systemType.Attachmen
 // This function is auto-generated
 func (s Store) DeleteAttachment(ctx context.Context, rr ...*systemType.Attachment) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, attachmentDeleteQuery(s.config.Dialect, attachmentPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, attachmentDeleteQuery(s.Dialect, attachmentPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -1958,14 +1962,14 @@ func (s Store) DeleteAttachment(ctx context.Context, rr ...*systemType.Attachmen
 //
 // This function is auto-generated
 func (s Store) DeleteAttachmentByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, attachmentDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, attachmentDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAttachments Deletes all rows from the attachment collection
 func (s Store) TruncateAttachments(ctx context.Context) error {
-	return s.Exec(ctx, attachmentTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, attachmentTruncateQuery(s.Dialect))
 }
 
 // SearchAttachments returns (filtered) set of Attachments
@@ -2157,7 +2161,7 @@ func (s Store) QueryAttachments(
 
 		set         = make([]*systemType.Attachment, 0, DefaultSliceCapacity)
 		res         *systemType.Attachment
-		aux         auxAttachment
+		aux         *auxAttachment
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -2165,9 +2169,9 @@ func (s Store) QueryAttachments(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Attachment != nil {
+	if s.Filters.Attachment != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Attachment(f)
+		tExpr, f, err = s.Filters.Attachment(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AttachmentFilter(f)
@@ -2189,7 +2193,7 @@ func (s Store) QueryAttachments(
 		}
 	}
 
-	query := attachmentSelectQuery(s.config.Dialect).Where(expr...)
+	query := attachmentSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableAttachmentFields()); err != nil {
@@ -2230,6 +2234,7 @@ func (s Store) QueryAttachments(
 			return
 		}
 
+		aux = new(auxAttachment)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Attachment: %w", err)
 			return
@@ -2265,7 +2270,7 @@ func (s Store) LookupAttachmentByID(ctx context.Context, id uint64) (_ *systemTy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAttachment)
-		lookup = attachmentSelectQuery(s.config.Dialect).Where(
+		lookup = attachmentSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -2380,7 +2385,7 @@ func (s Store) CreateAuthClient(ctx context.Context, rr ...*systemType.AuthClien
 			return
 		}
 
-		if err = s.Exec(ctx, authClientInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authClientInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -2397,7 +2402,7 @@ func (s Store) UpdateAuthClient(ctx context.Context, rr ...*systemType.AuthClien
 			return
 		}
 
-		if err = s.Exec(ctx, authClientUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authClientUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -2414,7 +2419,7 @@ func (s Store) UpsertAuthClient(ctx context.Context, rr ...*systemType.AuthClien
 			return
 		}
 
-		if err = s.Exec(ctx, authClientUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authClientUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -2427,7 +2432,7 @@ func (s Store) UpsertAuthClient(ctx context.Context, rr ...*systemType.AuthClien
 // This function is auto-generated
 func (s Store) DeleteAuthClient(ctx context.Context, rr ...*systemType.AuthClient) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, authClientDeleteQuery(s.config.Dialect, authClientPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, authClientDeleteQuery(s.Dialect, authClientPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -2439,14 +2444,14 @@ func (s Store) DeleteAuthClient(ctx context.Context, rr ...*systemType.AuthClien
 //
 // This function is auto-generated
 func (s Store) DeleteAuthClientByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, authClientDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, authClientDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAuthClients Deletes all rows from the authClient collection
 func (s Store) TruncateAuthClients(ctx context.Context) error {
-	return s.Exec(ctx, authClientTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, authClientTruncateQuery(s.Dialect))
 }
 
 // SearchAuthClients returns (filtered) set of AuthClients
@@ -2638,7 +2643,7 @@ func (s Store) QueryAuthClients(
 
 		set         = make([]*systemType.AuthClient, 0, DefaultSliceCapacity)
 		res         *systemType.AuthClient
-		aux         auxAuthClient
+		aux         *auxAuthClient
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -2646,9 +2651,9 @@ func (s Store) QueryAuthClients(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.AuthClient != nil {
+	if s.Filters.AuthClient != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AuthClient(f)
+		tExpr, f, err = s.Filters.AuthClient(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AuthClientFilter(f)
@@ -2670,7 +2675,7 @@ func (s Store) QueryAuthClients(
 		}
 	}
 
-	query := authClientSelectQuery(s.config.Dialect).Where(expr...)
+	query := authClientSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableAuthClientFields()); err != nil {
@@ -2711,6 +2716,7 @@ func (s Store) QueryAuthClients(
 			return
 		}
 
+		aux = new(auxAuthClient)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AuthClient: %w", err)
 			return
@@ -2748,7 +2754,7 @@ func (s Store) LookupAuthClientByID(ctx context.Context, id uint64) (_ *systemTy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthClient)
-		lookup = authClientSelectQuery(s.config.Dialect).Where(
+		lookup = authClientSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -2790,8 +2796,8 @@ func (s Store) LookupAuthClientByHandle(ctx context.Context, handle string) (_ *
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthClient)
-		lookup = authClientSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+		lookup = authClientSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -2941,7 +2947,7 @@ func (s Store) CreateAuthConfirmedClient(ctx context.Context, rr ...*systemType.
 			return
 		}
 
-		if err = s.Exec(ctx, authConfirmedClientInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authConfirmedClientInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -2958,7 +2964,7 @@ func (s Store) UpdateAuthConfirmedClient(ctx context.Context, rr ...*systemType.
 			return
 		}
 
-		if err = s.Exec(ctx, authConfirmedClientUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authConfirmedClientUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -2975,7 +2981,7 @@ func (s Store) UpsertAuthConfirmedClient(ctx context.Context, rr ...*systemType.
 			return
 		}
 
-		if err = s.Exec(ctx, authConfirmedClientUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authConfirmedClientUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -2988,7 +2994,7 @@ func (s Store) UpsertAuthConfirmedClient(ctx context.Context, rr ...*systemType.
 // This function is auto-generated
 func (s Store) DeleteAuthConfirmedClient(ctx context.Context, rr ...*systemType.AuthConfirmedClient) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, authConfirmedClientDeleteQuery(s.config.Dialect, authConfirmedClientPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, authConfirmedClientDeleteQuery(s.Dialect, authConfirmedClientPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -3000,7 +3006,7 @@ func (s Store) DeleteAuthConfirmedClient(ctx context.Context, rr ...*systemType.
 //
 // This function is auto-generated
 func (s Store) DeleteAuthConfirmedClientByUserIDClientID(ctx context.Context, userID uint64, clientID uint64) error {
-	return s.Exec(ctx, authConfirmedClientDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, authConfirmedClientDeleteQuery(s.Dialect, goqu.Ex{
 		"rel_user":   userID,
 		"rel_client": clientID,
 	}))
@@ -3008,7 +3014,7 @@ func (s Store) DeleteAuthConfirmedClientByUserIDClientID(ctx context.Context, us
 
 // TruncateAuthConfirmedClients Deletes all rows from the authConfirmedClient collection
 func (s Store) TruncateAuthConfirmedClients(ctx context.Context) error {
-	return s.Exec(ctx, authConfirmedClientTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, authConfirmedClientTruncateQuery(s.Dialect))
 }
 
 // SearchAuthConfirmedClients returns (filtered) set of AuthConfirmedClients
@@ -3037,15 +3043,15 @@ func (s Store) QueryAuthConfirmedClients(
 	var (
 		set         = make([]*systemType.AuthConfirmedClient, 0, DefaultSliceCapacity)
 		res         *systemType.AuthConfirmedClient
-		aux         auxAuthConfirmedClient
+		aux         *auxAuthConfirmedClient
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.AuthConfirmedClient != nil {
+	if s.Filters.AuthConfirmedClient != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AuthConfirmedClient(f)
+		tExpr, f, err = s.Filters.AuthConfirmedClient(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AuthConfirmedClientFilter(f)
@@ -3058,7 +3064,7 @@ func (s Store) QueryAuthConfirmedClients(
 
 	expr = append(expr, tExpr...)
 
-	query := authConfirmedClientSelectQuery(s.config.Dialect).Where(expr...)
+	query := authConfirmedClientSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -3089,6 +3095,7 @@ func (s Store) QueryAuthConfirmedClients(
 			return
 		}
 
+		aux = new(auxAuthConfirmedClient)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AuthConfirmedClient: %w", err)
 			return
@@ -3114,7 +3121,7 @@ func (s Store) LookupAuthConfirmedClientByUserIDClientID(ctx context.Context, us
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthConfirmedClient)
-		lookup = authConfirmedClientSelectQuery(s.config.Dialect).Where(
+		lookup = authConfirmedClientSelectQuery(s.Dialect).Where(
 			goqu.I("rel_user").Eq(userID),
 			goqu.I("rel_client").Eq(clientID),
 		).Limit(1)
@@ -3232,7 +3239,7 @@ func (s Store) CreateAuthOa2token(ctx context.Context, rr ...*systemType.AuthOa2
 			return
 		}
 
-		if err = s.Exec(ctx, authOa2tokenInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authOa2tokenInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3249,7 +3256,7 @@ func (s Store) UpdateAuthOa2token(ctx context.Context, rr ...*systemType.AuthOa2
 			return
 		}
 
-		if err = s.Exec(ctx, authOa2tokenUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authOa2tokenUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3266,7 +3273,7 @@ func (s Store) UpsertAuthOa2token(ctx context.Context, rr ...*systemType.AuthOa2
 			return
 		}
 
-		if err = s.Exec(ctx, authOa2tokenUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authOa2tokenUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3279,7 +3286,7 @@ func (s Store) UpsertAuthOa2token(ctx context.Context, rr ...*systemType.AuthOa2
 // This function is auto-generated
 func (s Store) DeleteAuthOa2token(ctx context.Context, rr ...*systemType.AuthOa2token) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, authOa2tokenDeleteQuery(s.config.Dialect, authOa2tokenPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, authOa2tokenDeleteQuery(s.Dialect, authOa2tokenPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -3291,14 +3298,14 @@ func (s Store) DeleteAuthOa2token(ctx context.Context, rr ...*systemType.AuthOa2
 //
 // This function is auto-generated
 func (s Store) DeleteAuthOa2tokenByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, authOa2tokenDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, authOa2tokenDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAuthOa2tokens Deletes all rows from the authOa2token collection
 func (s Store) TruncateAuthOa2tokens(ctx context.Context) error {
-	return s.Exec(ctx, authOa2tokenTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, authOa2tokenTruncateQuery(s.Dialect))
 }
 
 // SearchAuthOa2tokens returns (filtered) set of AuthOa2tokens
@@ -3327,15 +3334,15 @@ func (s Store) QueryAuthOa2tokens(
 	var (
 		set         = make([]*systemType.AuthOa2token, 0, DefaultSliceCapacity)
 		res         *systemType.AuthOa2token
-		aux         auxAuthOa2token
+		aux         *auxAuthOa2token
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.AuthOa2token != nil {
+	if s.Filters.AuthOa2token != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AuthOa2token(f)
+		tExpr, f, err = s.Filters.AuthOa2token(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AuthOa2tokenFilter(f)
@@ -3348,7 +3355,7 @@ func (s Store) QueryAuthOa2tokens(
 
 	expr = append(expr, tExpr...)
 
-	query := authOa2tokenSelectQuery(s.config.Dialect).Where(expr...)
+	query := authOa2tokenSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -3379,6 +3386,7 @@ func (s Store) QueryAuthOa2tokens(
 			return
 		}
 
+		aux = new(auxAuthOa2token)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AuthOa2token: %w", err)
 			return
@@ -3404,7 +3412,7 @@ func (s Store) LookupAuthOa2tokenByID(ctx context.Context, id uint64) (_ *system
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthOa2token)
-		lookup = authOa2tokenSelectQuery(s.config.Dialect).Where(
+		lookup = authOa2tokenSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -3444,7 +3452,7 @@ func (s Store) LookupAuthOa2tokenByCode(ctx context.Context, code string) (_ *sy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthOa2token)
-		lookup = authOa2tokenSelectQuery(s.config.Dialect).Where(
+		lookup = authOa2tokenSelectQuery(s.Dialect).Where(
 			goqu.I("code").Eq(code),
 		).Limit(1)
 	)
@@ -3484,7 +3492,7 @@ func (s Store) LookupAuthOa2tokenByAccess(ctx context.Context, access string) (_
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthOa2token)
-		lookup = authOa2tokenSelectQuery(s.config.Dialect).Where(
+		lookup = authOa2tokenSelectQuery(s.Dialect).Where(
 			goqu.I("access").Eq(access),
 		).Limit(1)
 	)
@@ -3524,7 +3532,7 @@ func (s Store) LookupAuthOa2tokenByRefresh(ctx context.Context, refresh string) 
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthOa2token)
-		lookup = authOa2tokenSelectQuery(s.config.Dialect).Where(
+		lookup = authOa2tokenSelectQuery(s.Dialect).Where(
 			goqu.I("refresh").Eq(refresh),
 		).Limit(1)
 	)
@@ -3635,7 +3643,7 @@ func (s Store) CreateAuthSession(ctx context.Context, rr ...*systemType.AuthSess
 			return
 		}
 
-		if err = s.Exec(ctx, authSessionInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authSessionInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3652,7 +3660,7 @@ func (s Store) UpdateAuthSession(ctx context.Context, rr ...*systemType.AuthSess
 			return
 		}
 
-		if err = s.Exec(ctx, authSessionUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authSessionUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3669,7 +3677,7 @@ func (s Store) UpsertAuthSession(ctx context.Context, rr ...*systemType.AuthSess
 			return
 		}
 
-		if err = s.Exec(ctx, authSessionUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, authSessionUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3682,7 +3690,7 @@ func (s Store) UpsertAuthSession(ctx context.Context, rr ...*systemType.AuthSess
 // This function is auto-generated
 func (s Store) DeleteAuthSession(ctx context.Context, rr ...*systemType.AuthSession) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, authSessionDeleteQuery(s.config.Dialect, authSessionPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, authSessionDeleteQuery(s.Dialect, authSessionPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -3694,14 +3702,14 @@ func (s Store) DeleteAuthSession(ctx context.Context, rr ...*systemType.AuthSess
 //
 // This function is auto-generated
 func (s Store) DeleteAuthSessionByID(ctx context.Context, id string) error {
-	return s.Exec(ctx, authSessionDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, authSessionDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAuthSessions Deletes all rows from the authSession collection
 func (s Store) TruncateAuthSessions(ctx context.Context) error {
-	return s.Exec(ctx, authSessionTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, authSessionTruncateQuery(s.Dialect))
 }
 
 // SearchAuthSessions returns (filtered) set of AuthSessions
@@ -3730,15 +3738,15 @@ func (s Store) QueryAuthSessions(
 	var (
 		set         = make([]*systemType.AuthSession, 0, DefaultSliceCapacity)
 		res         *systemType.AuthSession
-		aux         auxAuthSession
+		aux         *auxAuthSession
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.AuthSession != nil {
+	if s.Filters.AuthSession != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AuthSession(f)
+		tExpr, f, err = s.Filters.AuthSession(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AuthSessionFilter(f)
@@ -3751,7 +3759,7 @@ func (s Store) QueryAuthSessions(
 
 	expr = append(expr, tExpr...)
 
-	query := authSessionSelectQuery(s.config.Dialect).Where(expr...)
+	query := authSessionSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -3782,6 +3790,7 @@ func (s Store) QueryAuthSessions(
 			return
 		}
 
+		aux = new(auxAuthSession)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AuthSession: %w", err)
 			return
@@ -3807,7 +3816,7 @@ func (s Store) LookupAuthSessionByID(ctx context.Context, id string) (_ *systemT
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAuthSession)
-		lookup = authSessionSelectQuery(s.config.Dialect).Where(
+		lookup = authSessionSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -3918,7 +3927,7 @@ func (s Store) CreateAutomationSession(ctx context.Context, rr ...*automationTyp
 			return
 		}
 
-		if err = s.Exec(ctx, automationSessionInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationSessionInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3935,7 +3944,7 @@ func (s Store) UpdateAutomationSession(ctx context.Context, rr ...*automationTyp
 			return
 		}
 
-		if err = s.Exec(ctx, automationSessionUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationSessionUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3952,7 +3961,7 @@ func (s Store) UpsertAutomationSession(ctx context.Context, rr ...*automationTyp
 			return
 		}
 
-		if err = s.Exec(ctx, automationSessionUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationSessionUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -3965,7 +3974,7 @@ func (s Store) UpsertAutomationSession(ctx context.Context, rr ...*automationTyp
 // This function is auto-generated
 func (s Store) DeleteAutomationSession(ctx context.Context, rr ...*automationType.Session) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, automationSessionDeleteQuery(s.config.Dialect, automationSessionPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, automationSessionDeleteQuery(s.Dialect, automationSessionPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -3977,14 +3986,14 @@ func (s Store) DeleteAutomationSession(ctx context.Context, rr ...*automationTyp
 //
 // This function is auto-generated
 func (s Store) DeleteAutomationSessionByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, automationSessionDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, automationSessionDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAutomationSessions Deletes all rows from the automationSession collection
 func (s Store) TruncateAutomationSessions(ctx context.Context) error {
-	return s.Exec(ctx, automationSessionTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, automationSessionTruncateQuery(s.Dialect))
 }
 
 // SearchAutomationSessions returns (filtered) set of AutomationSessions
@@ -4176,7 +4185,7 @@ func (s Store) QueryAutomationSessions(
 
 		set         = make([]*automationType.Session, 0, DefaultSliceCapacity)
 		res         *automationType.Session
-		aux         auxAutomationSession
+		aux         *auxAutomationSession
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -4184,9 +4193,9 @@ func (s Store) QueryAutomationSessions(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.AutomationSession != nil {
+	if s.Filters.AutomationSession != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AutomationSession(f)
+		tExpr, f, err = s.Filters.AutomationSession(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AutomationSessionFilter(f)
@@ -4208,7 +4217,7 @@ func (s Store) QueryAutomationSessions(
 		}
 	}
 
-	query := automationSessionSelectQuery(s.config.Dialect).Where(expr...)
+	query := automationSessionSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableAutomationSessionFields()); err != nil {
@@ -4249,6 +4258,7 @@ func (s Store) QueryAutomationSessions(
 			return
 		}
 
+		aux = new(auxAutomationSession)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AutomationSession: %w", err)
 			return
@@ -4286,7 +4296,7 @@ func (s Store) LookupAutomationSessionByID(ctx context.Context, id uint64) (_ *a
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAutomationSession)
-		lookup = automationSessionSelectQuery(s.config.Dialect).Where(
+		lookup = automationSessionSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -4405,7 +4415,7 @@ func (s Store) CreateAutomationTrigger(ctx context.Context, rr ...*automationTyp
 			return
 		}
 
-		if err = s.Exec(ctx, automationTriggerInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationTriggerInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -4422,7 +4432,7 @@ func (s Store) UpdateAutomationTrigger(ctx context.Context, rr ...*automationTyp
 			return
 		}
 
-		if err = s.Exec(ctx, automationTriggerUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationTriggerUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -4439,7 +4449,7 @@ func (s Store) UpsertAutomationTrigger(ctx context.Context, rr ...*automationTyp
 			return
 		}
 
-		if err = s.Exec(ctx, automationTriggerUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationTriggerUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -4452,7 +4462,7 @@ func (s Store) UpsertAutomationTrigger(ctx context.Context, rr ...*automationTyp
 // This function is auto-generated
 func (s Store) DeleteAutomationTrigger(ctx context.Context, rr ...*automationType.Trigger) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, automationTriggerDeleteQuery(s.config.Dialect, automationTriggerPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, automationTriggerDeleteQuery(s.Dialect, automationTriggerPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -4464,14 +4474,14 @@ func (s Store) DeleteAutomationTrigger(ctx context.Context, rr ...*automationTyp
 //
 // This function is auto-generated
 func (s Store) DeleteAutomationTriggerByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, automationTriggerDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, automationTriggerDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAutomationTriggers Deletes all rows from the automationTrigger collection
 func (s Store) TruncateAutomationTriggers(ctx context.Context) error {
-	return s.Exec(ctx, automationTriggerTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, automationTriggerTruncateQuery(s.Dialect))
 }
 
 // SearchAutomationTriggers returns (filtered) set of AutomationTriggers
@@ -4663,7 +4673,7 @@ func (s Store) QueryAutomationTriggers(
 
 		set         = make([]*automationType.Trigger, 0, DefaultSliceCapacity)
 		res         *automationType.Trigger
-		aux         auxAutomationTrigger
+		aux         *auxAutomationTrigger
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -4671,9 +4681,9 @@ func (s Store) QueryAutomationTriggers(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.AutomationTrigger != nil {
+	if s.Filters.AutomationTrigger != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AutomationTrigger(f)
+		tExpr, f, err = s.Filters.AutomationTrigger(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AutomationTriggerFilter(f)
@@ -4695,7 +4705,7 @@ func (s Store) QueryAutomationTriggers(
 		}
 	}
 
-	query := automationTriggerSelectQuery(s.config.Dialect).Where(expr...)
+	query := automationTriggerSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableAutomationTriggerFields()); err != nil {
@@ -4736,6 +4746,7 @@ func (s Store) QueryAutomationTriggers(
 			return
 		}
 
+		aux = new(auxAutomationTrigger)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AutomationTrigger: %w", err)
 			return
@@ -4773,7 +4784,7 @@ func (s Store) LookupAutomationTriggerByID(ctx context.Context, id uint64) (_ *a
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAutomationTrigger)
-		lookup = automationTriggerSelectQuery(s.config.Dialect).Where(
+		lookup = automationTriggerSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -4888,7 +4899,7 @@ func (s Store) CreateAutomationWorkflow(ctx context.Context, rr ...*automationTy
 			return
 		}
 
-		if err = s.Exec(ctx, automationWorkflowInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationWorkflowInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -4905,7 +4916,7 @@ func (s Store) UpdateAutomationWorkflow(ctx context.Context, rr ...*automationTy
 			return
 		}
 
-		if err = s.Exec(ctx, automationWorkflowUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationWorkflowUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -4922,7 +4933,7 @@ func (s Store) UpsertAutomationWorkflow(ctx context.Context, rr ...*automationTy
 			return
 		}
 
-		if err = s.Exec(ctx, automationWorkflowUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, automationWorkflowUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -4935,7 +4946,7 @@ func (s Store) UpsertAutomationWorkflow(ctx context.Context, rr ...*automationTy
 // This function is auto-generated
 func (s Store) DeleteAutomationWorkflow(ctx context.Context, rr ...*automationType.Workflow) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, automationWorkflowDeleteQuery(s.config.Dialect, automationWorkflowPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, automationWorkflowDeleteQuery(s.Dialect, automationWorkflowPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -4947,14 +4958,14 @@ func (s Store) DeleteAutomationWorkflow(ctx context.Context, rr ...*automationTy
 //
 // This function is auto-generated
 func (s Store) DeleteAutomationWorkflowByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, automationWorkflowDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, automationWorkflowDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateAutomationWorkflows Deletes all rows from the automationWorkflow collection
 func (s Store) TruncateAutomationWorkflows(ctx context.Context) error {
-	return s.Exec(ctx, automationWorkflowTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, automationWorkflowTruncateQuery(s.Dialect))
 }
 
 // SearchAutomationWorkflows returns (filtered) set of AutomationWorkflows
@@ -5146,7 +5157,7 @@ func (s Store) QueryAutomationWorkflows(
 
 		set         = make([]*automationType.Workflow, 0, DefaultSliceCapacity)
 		res         *automationType.Workflow
-		aux         auxAutomationWorkflow
+		aux         *auxAutomationWorkflow
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -5154,9 +5165,9 @@ func (s Store) QueryAutomationWorkflows(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.AutomationWorkflow != nil {
+	if s.Filters.AutomationWorkflow != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.AutomationWorkflow(f)
+		tExpr, f, err = s.Filters.AutomationWorkflow(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = AutomationWorkflowFilter(f)
@@ -5178,7 +5189,7 @@ func (s Store) QueryAutomationWorkflows(
 		}
 	}
 
-	query := automationWorkflowSelectQuery(s.config.Dialect).Where(expr...)
+	query := automationWorkflowSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableAutomationWorkflowFields()); err != nil {
@@ -5219,6 +5230,7 @@ func (s Store) QueryAutomationWorkflows(
 			return
 		}
 
+		aux = new(auxAutomationWorkflow)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for AutomationWorkflow: %w", err)
 			return
@@ -5256,7 +5268,7 @@ func (s Store) LookupAutomationWorkflowByID(ctx context.Context, id uint64) (_ *
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAutomationWorkflow)
-		lookup = automationWorkflowSelectQuery(s.config.Dialect).Where(
+		lookup = automationWorkflowSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -5298,8 +5310,8 @@ func (s Store) LookupAutomationWorkflowByHandle(ctx context.Context, handle stri
 	var (
 		rows   *sql.Rows
 		aux    = new(auxAutomationWorkflow)
-		lookup = automationWorkflowSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+		lookup = automationWorkflowSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -5445,7 +5457,7 @@ func (s Store) CreateComposeAttachment(ctx context.Context, rr ...*composeType.A
 			return
 		}
 
-		if err = s.Exec(ctx, composeAttachmentInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeAttachmentInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -5462,7 +5474,7 @@ func (s Store) UpdateComposeAttachment(ctx context.Context, rr ...*composeType.A
 			return
 		}
 
-		if err = s.Exec(ctx, composeAttachmentUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeAttachmentUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -5479,7 +5491,7 @@ func (s Store) UpsertComposeAttachment(ctx context.Context, rr ...*composeType.A
 			return
 		}
 
-		if err = s.Exec(ctx, composeAttachmentUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeAttachmentUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -5492,7 +5504,7 @@ func (s Store) UpsertComposeAttachment(ctx context.Context, rr ...*composeType.A
 // This function is auto-generated
 func (s Store) DeleteComposeAttachment(ctx context.Context, rr ...*composeType.Attachment) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeAttachmentDeleteQuery(s.config.Dialect, composeAttachmentPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeAttachmentDeleteQuery(s.Dialect, composeAttachmentPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -5504,14 +5516,14 @@ func (s Store) DeleteComposeAttachment(ctx context.Context, rr ...*composeType.A
 //
 // This function is auto-generated
 func (s Store) DeleteComposeAttachmentByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, composeAttachmentDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeAttachmentDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposeAttachments Deletes all rows from the composeAttachment collection
 func (s Store) TruncateComposeAttachments(ctx context.Context) error {
-	return s.Exec(ctx, composeAttachmentTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeAttachmentTruncateQuery(s.Dialect))
 }
 
 // SearchComposeAttachments returns (filtered) set of ComposeAttachments
@@ -5703,7 +5715,7 @@ func (s Store) QueryComposeAttachments(
 
 		set         = make([]*composeType.Attachment, 0, DefaultSliceCapacity)
 		res         *composeType.Attachment
-		aux         auxComposeAttachment
+		aux         *auxComposeAttachment
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -5711,9 +5723,9 @@ func (s Store) QueryComposeAttachments(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ComposeAttachment != nil {
+	if s.Filters.ComposeAttachment != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeAttachment(f)
+		tExpr, f, err = s.Filters.ComposeAttachment(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeAttachmentFilter(f)
@@ -5735,7 +5747,7 @@ func (s Store) QueryComposeAttachments(
 		}
 	}
 
-	query := composeAttachmentSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeAttachmentSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableComposeAttachmentFields()); err != nil {
@@ -5776,6 +5788,7 @@ func (s Store) QueryComposeAttachments(
 			return
 		}
 
+		aux = new(auxComposeAttachment)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeAttachment: %w", err)
 			return
@@ -5811,7 +5824,7 @@ func (s Store) LookupComposeAttachmentByID(ctx context.Context, id uint64) (_ *c
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeAttachment)
-		lookup = composeAttachmentSelectQuery(s.config.Dialect).Where(
+		lookup = composeAttachmentSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -5926,7 +5939,7 @@ func (s Store) CreateComposeChart(ctx context.Context, rr ...*composeType.Chart)
 			return
 		}
 
-		if err = s.Exec(ctx, composeChartInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeChartInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -5943,7 +5956,7 @@ func (s Store) UpdateComposeChart(ctx context.Context, rr ...*composeType.Chart)
 			return
 		}
 
-		if err = s.Exec(ctx, composeChartUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeChartUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -5960,7 +5973,7 @@ func (s Store) UpsertComposeChart(ctx context.Context, rr ...*composeType.Chart)
 			return
 		}
 
-		if err = s.Exec(ctx, composeChartUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeChartUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -5973,7 +5986,7 @@ func (s Store) UpsertComposeChart(ctx context.Context, rr ...*composeType.Chart)
 // This function is auto-generated
 func (s Store) DeleteComposeChart(ctx context.Context, rr ...*composeType.Chart) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeChartDeleteQuery(s.config.Dialect, composeChartPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeChartDeleteQuery(s.Dialect, composeChartPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -5985,14 +5998,14 @@ func (s Store) DeleteComposeChart(ctx context.Context, rr ...*composeType.Chart)
 //
 // This function is auto-generated
 func (s Store) DeleteComposeChartByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, composeChartDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeChartDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposeCharts Deletes all rows from the composeChart collection
 func (s Store) TruncateComposeCharts(ctx context.Context) error {
-	return s.Exec(ctx, composeChartTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeChartTruncateQuery(s.Dialect))
 }
 
 // SearchComposeCharts returns (filtered) set of ComposeCharts
@@ -6184,7 +6197,7 @@ func (s Store) QueryComposeCharts(
 
 		set         = make([]*composeType.Chart, 0, DefaultSliceCapacity)
 		res         *composeType.Chart
-		aux         auxComposeChart
+		aux         *auxComposeChart
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -6192,9 +6205,9 @@ func (s Store) QueryComposeCharts(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ComposeChart != nil {
+	if s.Filters.ComposeChart != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeChart(f)
+		tExpr, f, err = s.Filters.ComposeChart(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeChartFilter(f)
@@ -6216,7 +6229,7 @@ func (s Store) QueryComposeCharts(
 		}
 	}
 
-	query := composeChartSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeChartSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableComposeChartFields()); err != nil {
@@ -6257,6 +6270,7 @@ func (s Store) QueryComposeCharts(
 			return
 		}
 
+		aux = new(auxComposeChart)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeChart: %w", err)
 			return
@@ -6294,7 +6308,7 @@ func (s Store) LookupComposeChartByID(ctx context.Context, id uint64) (_ *compos
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeChart)
-		lookup = composeChartSelectQuery(s.config.Dialect).Where(
+		lookup = composeChartSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -6334,9 +6348,9 @@ func (s Store) LookupComposeChartByNamespaceIDHandle(ctx context.Context, namesp
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeChart)
-		lookup = composeChartSelectQuery(s.config.Dialect).Where(
+		lookup = composeChartSelectQuery(s.Dialect).Where(
 			goqu.I("rel_namespace").Eq(namespaceID),
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -6455,7 +6469,7 @@ func (s Store) CreateComposeModule(ctx context.Context, rr ...*composeType.Modul
 			return
 		}
 
-		if err = s.Exec(ctx, composeModuleInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeModuleInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -6472,7 +6486,7 @@ func (s Store) UpdateComposeModule(ctx context.Context, rr ...*composeType.Modul
 			return
 		}
 
-		if err = s.Exec(ctx, composeModuleUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeModuleUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -6489,7 +6503,7 @@ func (s Store) UpsertComposeModule(ctx context.Context, rr ...*composeType.Modul
 			return
 		}
 
-		if err = s.Exec(ctx, composeModuleUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeModuleUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -6502,7 +6516,7 @@ func (s Store) UpsertComposeModule(ctx context.Context, rr ...*composeType.Modul
 // This function is auto-generated
 func (s Store) DeleteComposeModule(ctx context.Context, rr ...*composeType.Module) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeModuleDeleteQuery(s.config.Dialect, composeModulePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeModuleDeleteQuery(s.Dialect, composeModulePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -6514,14 +6528,14 @@ func (s Store) DeleteComposeModule(ctx context.Context, rr ...*composeType.Modul
 //
 // This function is auto-generated
 func (s Store) DeleteComposeModuleByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, composeModuleDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeModuleDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposeModules Deletes all rows from the composeModule collection
 func (s Store) TruncateComposeModules(ctx context.Context) error {
-	return s.Exec(ctx, composeModuleTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeModuleTruncateQuery(s.Dialect))
 }
 
 // SearchComposeModules returns (filtered) set of ComposeModules
@@ -6713,7 +6727,7 @@ func (s Store) QueryComposeModules(
 
 		set         = make([]*composeType.Module, 0, DefaultSliceCapacity)
 		res         *composeType.Module
-		aux         auxComposeModule
+		aux         *auxComposeModule
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -6721,9 +6735,9 @@ func (s Store) QueryComposeModules(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ComposeModule != nil {
+	if s.Filters.ComposeModule != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeModule(f)
+		tExpr, f, err = s.Filters.ComposeModule(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeModuleFilter(f)
@@ -6745,7 +6759,7 @@ func (s Store) QueryComposeModules(
 		}
 	}
 
-	query := composeModuleSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeModuleSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableComposeModuleFields()); err != nil {
@@ -6786,6 +6800,7 @@ func (s Store) QueryComposeModules(
 			return
 		}
 
+		aux = new(auxComposeModule)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeModule: %w", err)
 			return
@@ -6821,9 +6836,9 @@ func (s Store) LookupComposeModuleByNamespaceIDHandle(ctx context.Context, names
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeModule)
-		lookup = composeModuleSelectQuery(s.config.Dialect).Where(
+		lookup = composeModuleSelectQuery(s.Dialect).Where(
 			goqu.I("rel_namespace").Eq(namespaceID),
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -6863,7 +6878,7 @@ func (s Store) LookupComposeModuleByNamespaceIDName(ctx context.Context, namespa
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeModule)
-		lookup = composeModuleSelectQuery(s.config.Dialect).Where(
+		lookup = composeModuleSelectQuery(s.Dialect).Where(
 			goqu.I("rel_namespace").Eq(namespaceID),
 			goqu.I("name").Eq(name),
 			goqu.I("deleted_at").IsNull(),
@@ -6907,7 +6922,7 @@ func (s Store) LookupComposeModuleByID(ctx context.Context, id uint64) (_ *compo
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeModule)
-		lookup = composeModuleSelectQuery(s.config.Dialect).Where(
+		lookup = composeModuleSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -7058,7 +7073,7 @@ func (s Store) CreateComposeModuleField(ctx context.Context, rr ...*composeType.
 			return
 		}
 
-		if err = s.Exec(ctx, composeModuleFieldInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeModuleFieldInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7075,7 +7090,7 @@ func (s Store) UpdateComposeModuleField(ctx context.Context, rr ...*composeType.
 			return
 		}
 
-		if err = s.Exec(ctx, composeModuleFieldUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeModuleFieldUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7092,7 +7107,7 @@ func (s Store) UpsertComposeModuleField(ctx context.Context, rr ...*composeType.
 			return
 		}
 
-		if err = s.Exec(ctx, composeModuleFieldUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeModuleFieldUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7105,7 +7120,7 @@ func (s Store) UpsertComposeModuleField(ctx context.Context, rr ...*composeType.
 // This function is auto-generated
 func (s Store) DeleteComposeModuleField(ctx context.Context, rr ...*composeType.ModuleField) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeModuleFieldDeleteQuery(s.config.Dialect, composeModuleFieldPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeModuleFieldDeleteQuery(s.Dialect, composeModuleFieldPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -7117,14 +7132,14 @@ func (s Store) DeleteComposeModuleField(ctx context.Context, rr ...*composeType.
 //
 // This function is auto-generated
 func (s Store) DeleteComposeModuleFieldByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, composeModuleFieldDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeModuleFieldDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposeModuleFields Deletes all rows from the composeModuleField collection
 func (s Store) TruncateComposeModuleFields(ctx context.Context) error {
-	return s.Exec(ctx, composeModuleFieldTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeModuleFieldTruncateQuery(s.Dialect))
 }
 
 // SearchComposeModuleFields returns (filtered) set of ComposeModuleFields
@@ -7153,15 +7168,15 @@ func (s Store) QueryComposeModuleFields(
 	var (
 		set         = make([]*composeType.ModuleField, 0, DefaultSliceCapacity)
 		res         *composeType.ModuleField
-		aux         auxComposeModuleField
+		aux         *auxComposeModuleField
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.ComposeModuleField != nil {
+	if s.Filters.ComposeModuleField != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeModuleField(f)
+		tExpr, f, err = s.Filters.ComposeModuleField(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeModuleFieldFilter(f)
@@ -7174,7 +7189,7 @@ func (s Store) QueryComposeModuleFields(
 
 	expr = append(expr, tExpr...)
 
-	query := composeModuleFieldSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeModuleFieldSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -7205,6 +7220,7 @@ func (s Store) QueryComposeModuleFields(
 			return
 		}
 
+		aux = new(auxComposeModuleField)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeModuleField: %w", err)
 			return
@@ -7230,7 +7246,7 @@ func (s Store) LookupComposeModuleFieldByModuleIDName(ctx context.Context, modul
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeModuleField)
-		lookup = composeModuleFieldSelectQuery(s.config.Dialect).Where(
+		lookup = composeModuleFieldSelectQuery(s.Dialect).Where(
 			goqu.I("rel_module").Eq(moduleID),
 			goqu.I("name").Eq(name),
 			goqu.I("deleted_at").IsNull(),
@@ -7367,7 +7383,7 @@ func (s Store) CreateComposeNamespace(ctx context.Context, rr ...*composeType.Na
 			return
 		}
 
-		if err = s.Exec(ctx, composeNamespaceInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeNamespaceInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7384,7 +7400,7 @@ func (s Store) UpdateComposeNamespace(ctx context.Context, rr ...*composeType.Na
 			return
 		}
 
-		if err = s.Exec(ctx, composeNamespaceUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeNamespaceUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7401,7 +7417,7 @@ func (s Store) UpsertComposeNamespace(ctx context.Context, rr ...*composeType.Na
 			return
 		}
 
-		if err = s.Exec(ctx, composeNamespaceUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeNamespaceUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7414,7 +7430,7 @@ func (s Store) UpsertComposeNamespace(ctx context.Context, rr ...*composeType.Na
 // This function is auto-generated
 func (s Store) DeleteComposeNamespace(ctx context.Context, rr ...*composeType.Namespace) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeNamespaceDeleteQuery(s.config.Dialect, composeNamespacePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeNamespaceDeleteQuery(s.Dialect, composeNamespacePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -7426,14 +7442,14 @@ func (s Store) DeleteComposeNamespace(ctx context.Context, rr ...*composeType.Na
 //
 // This function is auto-generated
 func (s Store) DeleteComposeNamespaceByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, composeNamespaceDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeNamespaceDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposeNamespaces Deletes all rows from the composeNamespace collection
 func (s Store) TruncateComposeNamespaces(ctx context.Context) error {
-	return s.Exec(ctx, composeNamespaceTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeNamespaceTruncateQuery(s.Dialect))
 }
 
 // SearchComposeNamespaces returns (filtered) set of ComposeNamespaces
@@ -7625,7 +7641,7 @@ func (s Store) QueryComposeNamespaces(
 
 		set         = make([]*composeType.Namespace, 0, DefaultSliceCapacity)
 		res         *composeType.Namespace
-		aux         auxComposeNamespace
+		aux         *auxComposeNamespace
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -7633,9 +7649,9 @@ func (s Store) QueryComposeNamespaces(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ComposeNamespace != nil {
+	if s.Filters.ComposeNamespace != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeNamespace(f)
+		tExpr, f, err = s.Filters.ComposeNamespace(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeNamespaceFilter(f)
@@ -7657,7 +7673,7 @@ func (s Store) QueryComposeNamespaces(
 		}
 	}
 
-	query := composeNamespaceSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeNamespaceSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableComposeNamespaceFields()); err != nil {
@@ -7698,6 +7714,7 @@ func (s Store) QueryComposeNamespaces(
 			return
 		}
 
+		aux = new(auxComposeNamespace)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeNamespace: %w", err)
 			return
@@ -7733,7 +7750,7 @@ func (s Store) LookupComposeNamespaceBySlug(ctx context.Context, slug string) (_
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeNamespace)
-		lookup = composeNamespaceSelectQuery(s.config.Dialect).Where(
+		lookup = composeNamespaceSelectQuery(s.Dialect).Where(
 			goqu.I("slug").Eq(slug),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
@@ -7776,7 +7793,7 @@ func (s Store) LookupComposeNamespaceByID(ctx context.Context, id uint64) (_ *co
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeNamespace)
-		lookup = composeNamespaceSelectQuery(s.config.Dialect).Where(
+		lookup = composeNamespaceSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -7918,7 +7935,7 @@ func (s Store) CreateComposePage(ctx context.Context, rr ...*composeType.Page) (
 			return
 		}
 
-		if err = s.Exec(ctx, composePageInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composePageInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7935,7 +7952,7 @@ func (s Store) UpdateComposePage(ctx context.Context, rr ...*composeType.Page) (
 			return
 		}
 
-		if err = s.Exec(ctx, composePageUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composePageUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7952,7 +7969,7 @@ func (s Store) UpsertComposePage(ctx context.Context, rr ...*composeType.Page) (
 			return
 		}
 
-		if err = s.Exec(ctx, composePageUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composePageUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -7965,7 +7982,7 @@ func (s Store) UpsertComposePage(ctx context.Context, rr ...*composeType.Page) (
 // This function is auto-generated
 func (s Store) DeleteComposePage(ctx context.Context, rr ...*composeType.Page) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composePageDeleteQuery(s.config.Dialect, composePagePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composePageDeleteQuery(s.Dialect, composePagePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -7977,14 +7994,14 @@ func (s Store) DeleteComposePage(ctx context.Context, rr ...*composeType.Page) (
 //
 // This function is auto-generated
 func (s Store) DeleteComposePageByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, composePageDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composePageDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposePages Deletes all rows from the composePage collection
 func (s Store) TruncateComposePages(ctx context.Context) error {
-	return s.Exec(ctx, composePageTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composePageTruncateQuery(s.Dialect))
 }
 
 // SearchComposePages returns (filtered) set of ComposePages
@@ -8176,7 +8193,7 @@ func (s Store) QueryComposePages(
 
 		set         = make([]*composeType.Page, 0, DefaultSliceCapacity)
 		res         *composeType.Page
-		aux         auxComposePage
+		aux         *auxComposePage
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -8184,9 +8201,9 @@ func (s Store) QueryComposePages(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ComposePage != nil {
+	if s.Filters.ComposePage != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposePage(f)
+		tExpr, f, err = s.Filters.ComposePage(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposePageFilter(f)
@@ -8208,7 +8225,7 @@ func (s Store) QueryComposePages(
 		}
 	}
 
-	query := composePageSelectQuery(s.config.Dialect).Where(expr...)
+	query := composePageSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableComposePageFields()); err != nil {
@@ -8249,6 +8266,7 @@ func (s Store) QueryComposePages(
 			return
 		}
 
+		aux = new(auxComposePage)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposePage: %w", err)
 			return
@@ -8284,9 +8302,9 @@ func (s Store) LookupComposePageByNamespaceIDHandle(ctx context.Context, namespa
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposePage)
-		lookup = composePageSelectQuery(s.config.Dialect).Where(
+		lookup = composePageSelectQuery(s.Dialect).Where(
 			goqu.I("rel_namespace").Eq(namespaceID),
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -8326,7 +8344,7 @@ func (s Store) LookupComposePageByNamespaceIDModuleID(ctx context.Context, names
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposePage)
-		lookup = composePageSelectQuery(s.config.Dialect).Where(
+		lookup = composePageSelectQuery(s.Dialect).Where(
 			goqu.I("rel_namespace").Eq(namespaceID),
 			goqu.I("rel_module").Eq(moduleID),
 			goqu.I("deleted_at").IsNull(),
@@ -8370,7 +8388,7 @@ func (s Store) LookupComposePageByID(ctx context.Context, id uint64) (_ *compose
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposePage)
-		lookup = composePageSelectQuery(s.config.Dialect).Where(
+		lookup = composePageSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -8489,7 +8507,7 @@ func (s Store) CreateComposeRecord(ctx context.Context, mod *composeType.Module,
 			return
 		}
 
-		if err = s.Exec(ctx, composeRecordInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeRecordInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -8506,7 +8524,7 @@ func (s Store) UpdateComposeRecord(ctx context.Context, mod *composeType.Module,
 			return
 		}
 
-		if err = s.Exec(ctx, composeRecordUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeRecordUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -8523,7 +8541,7 @@ func (s Store) UpsertComposeRecord(ctx context.Context, mod *composeType.Module,
 			return
 		}
 
-		if err = s.Exec(ctx, composeRecordUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeRecordUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -8536,7 +8554,7 @@ func (s Store) UpsertComposeRecord(ctx context.Context, mod *composeType.Module,
 // This function is auto-generated
 func (s Store) DeleteComposeRecord(ctx context.Context, mod *composeType.Module, rr ...*composeType.Record) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeRecordDeleteQuery(s.config.Dialect, composeRecordPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeRecordDeleteQuery(s.Dialect, composeRecordPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -8548,14 +8566,14 @@ func (s Store) DeleteComposeRecord(ctx context.Context, mod *composeType.Module,
 //
 // This function is auto-generated
 func (s Store) DeleteComposeRecordByID(ctx context.Context, mod *composeType.Module, id uint64) error {
-	return s.Exec(ctx, composeRecordDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeRecordDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateComposeRecords Deletes all rows from the composeRecord collection
 func (s Store) TruncateComposeRecords(ctx context.Context, mod *composeType.Module) error {
-	return s.Exec(ctx, composeRecordTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeRecordTruncateQuery(s.Dialect))
 }
 
 // SearchComposeRecords returns (filtered) set of ComposeRecords
@@ -8747,7 +8765,7 @@ func (s Store) QueryComposeRecords(
 
 		set         = make([]*composeType.Record, 0, DefaultSliceCapacity)
 		res         *composeType.Record
-		aux         auxComposeRecord
+		aux         *auxComposeRecord
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -8755,9 +8773,9 @@ func (s Store) QueryComposeRecords(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ComposeRecord != nil {
+	if s.Filters.ComposeRecord != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeRecord(f)
+		tExpr, f, err = s.Filters.ComposeRecord(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeRecordFilter(f)
@@ -8779,7 +8797,7 @@ func (s Store) QueryComposeRecords(
 		}
 	}
 
-	query := composeRecordSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeRecordSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableComposeRecordFields()); err != nil {
@@ -8820,6 +8838,7 @@ func (s Store) QueryComposeRecords(
 			return
 		}
 
+		aux = new(auxComposeRecord)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeRecord: %w", err)
 			return
@@ -8857,7 +8876,7 @@ func (s Store) LookupComposeRecordByID(ctx context.Context, mod *composeType.Mod
 	var (
 		rows   *sql.Rows
 		aux    = new(auxComposeRecord)
-		lookup = composeRecordSelectQuery(s.config.Dialect).Where(
+		lookup = composeRecordSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -8972,7 +8991,7 @@ func (s Store) CreateComposeRecordValue(ctx context.Context, rr ...*composeType.
 			return
 		}
 
-		if err = s.Exec(ctx, composeRecordValueInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeRecordValueInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -8989,7 +9008,7 @@ func (s Store) UpdateComposeRecordValue(ctx context.Context, rr ...*composeType.
 			return
 		}
 
-		if err = s.Exec(ctx, composeRecordValueUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeRecordValueUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9006,7 +9025,7 @@ func (s Store) UpsertComposeRecordValue(ctx context.Context, rr ...*composeType.
 			return
 		}
 
-		if err = s.Exec(ctx, composeRecordValueUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, composeRecordValueUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9019,7 +9038,7 @@ func (s Store) UpsertComposeRecordValue(ctx context.Context, rr ...*composeType.
 // This function is auto-generated
 func (s Store) DeleteComposeRecordValue(ctx context.Context, rr ...*composeType.RecordValue) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, composeRecordValueDeleteQuery(s.config.Dialect, composeRecordValuePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, composeRecordValueDeleteQuery(s.Dialect, composeRecordValuePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -9031,7 +9050,7 @@ func (s Store) DeleteComposeRecordValue(ctx context.Context, rr ...*composeType.
 //
 // This function is auto-generated
 func (s Store) DeleteComposeRecordValueByRecordIDNamePlace(ctx context.Context, recordID uint64, name string, place uint) error {
-	return s.Exec(ctx, composeRecordValueDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, composeRecordValueDeleteQuery(s.Dialect, goqu.Ex{
 		"record_id": recordID,
 		"name":      name,
 		"place":     place,
@@ -9040,7 +9059,7 @@ func (s Store) DeleteComposeRecordValueByRecordIDNamePlace(ctx context.Context, 
 
 // TruncateComposeRecordValues Deletes all rows from the composeRecordValue collection
 func (s Store) TruncateComposeRecordValues(ctx context.Context) error {
-	return s.Exec(ctx, composeRecordValueTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, composeRecordValueTruncateQuery(s.Dialect))
 }
 
 // SearchComposeRecordValues returns (filtered) set of ComposeRecordValues
@@ -9069,15 +9088,15 @@ func (s Store) QueryComposeRecordValues(
 	var (
 		set         = make([]*composeType.RecordValue, 0, DefaultSliceCapacity)
 		res         *composeType.RecordValue
-		aux         auxComposeRecordValue
+		aux         *auxComposeRecordValue
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.ComposeRecordValue != nil {
+	if s.Filters.ComposeRecordValue != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ComposeRecordValue(f)
+		tExpr, f, err = s.Filters.ComposeRecordValue(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ComposeRecordValueFilter(f)
@@ -9090,7 +9109,7 @@ func (s Store) QueryComposeRecordValues(
 
 	expr = append(expr, tExpr...)
 
-	query := composeRecordValueSelectQuery(s.config.Dialect).Where(expr...)
+	query := composeRecordValueSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -9121,6 +9140,7 @@ func (s Store) QueryComposeRecordValues(
 			return
 		}
 
+		aux = new(auxComposeRecordValue)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ComposeRecordValue: %w", err)
 			return
@@ -9230,7 +9250,7 @@ func (s Store) CreateCredential(ctx context.Context, rr ...*systemType.Credentia
 			return
 		}
 
-		if err = s.Exec(ctx, credentialInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, credentialInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9247,7 +9267,7 @@ func (s Store) UpdateCredential(ctx context.Context, rr ...*systemType.Credentia
 			return
 		}
 
-		if err = s.Exec(ctx, credentialUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, credentialUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9264,7 +9284,7 @@ func (s Store) UpsertCredential(ctx context.Context, rr ...*systemType.Credentia
 			return
 		}
 
-		if err = s.Exec(ctx, credentialUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, credentialUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9277,7 +9297,7 @@ func (s Store) UpsertCredential(ctx context.Context, rr ...*systemType.Credentia
 // This function is auto-generated
 func (s Store) DeleteCredential(ctx context.Context, rr ...*systemType.Credential) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, credentialDeleteQuery(s.config.Dialect, credentialPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, credentialDeleteQuery(s.Dialect, credentialPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -9289,14 +9309,14 @@ func (s Store) DeleteCredential(ctx context.Context, rr ...*systemType.Credentia
 //
 // This function is auto-generated
 func (s Store) DeleteCredentialByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, credentialDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, credentialDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateCredentials Deletes all rows from the credential collection
 func (s Store) TruncateCredentials(ctx context.Context) error {
-	return s.Exec(ctx, credentialTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, credentialTruncateQuery(s.Dialect))
 }
 
 // SearchCredentials returns (filtered) set of Credentials
@@ -9325,15 +9345,15 @@ func (s Store) QueryCredentials(
 	var (
 		set         = make([]*systemType.Credential, 0, DefaultSliceCapacity)
 		res         *systemType.Credential
-		aux         auxCredential
+		aux         *auxCredential
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.Credential != nil {
+	if s.Filters.Credential != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Credential(f)
+		tExpr, f, err = s.Filters.Credential(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = CredentialFilter(f)
@@ -9346,7 +9366,7 @@ func (s Store) QueryCredentials(
 
 	expr = append(expr, tExpr...)
 
-	query := credentialSelectQuery(s.config.Dialect).Where(expr...)
+	query := credentialSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -9377,6 +9397,7 @@ func (s Store) QueryCredentials(
 			return
 		}
 
+		aux = new(auxCredential)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Credential: %w", err)
 			return
@@ -9404,7 +9425,7 @@ func (s Store) LookupCredentialByID(ctx context.Context, id uint64) (_ *systemTy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxCredential)
-		lookup = credentialSelectQuery(s.config.Dialect).Where(
+		lookup = credentialSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -9527,7 +9548,7 @@ func (s Store) CreateFederationExposedModule(ctx context.Context, rr ...*federat
 			return
 		}
 
-		if err = s.Exec(ctx, federationExposedModuleInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationExposedModuleInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9544,7 +9565,7 @@ func (s Store) UpdateFederationExposedModule(ctx context.Context, rr ...*federat
 			return
 		}
 
-		if err = s.Exec(ctx, federationExposedModuleUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationExposedModuleUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9561,7 +9582,7 @@ func (s Store) UpsertFederationExposedModule(ctx context.Context, rr ...*federat
 			return
 		}
 
-		if err = s.Exec(ctx, federationExposedModuleUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationExposedModuleUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -9574,7 +9595,7 @@ func (s Store) UpsertFederationExposedModule(ctx context.Context, rr ...*federat
 // This function is auto-generated
 func (s Store) DeleteFederationExposedModule(ctx context.Context, rr ...*federationType.ExposedModule) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, federationExposedModuleDeleteQuery(s.config.Dialect, federationExposedModulePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, federationExposedModuleDeleteQuery(s.Dialect, federationExposedModulePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -9586,14 +9607,14 @@ func (s Store) DeleteFederationExposedModule(ctx context.Context, rr ...*federat
 //
 // This function is auto-generated
 func (s Store) DeleteFederationExposedModuleByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, federationExposedModuleDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, federationExposedModuleDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateFederationExposedModules Deletes all rows from the federationExposedModule collection
 func (s Store) TruncateFederationExposedModules(ctx context.Context) error {
-	return s.Exec(ctx, federationExposedModuleTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, federationExposedModuleTruncateQuery(s.Dialect))
 }
 
 // SearchFederationExposedModules returns (filtered) set of FederationExposedModules
@@ -9785,7 +9806,7 @@ func (s Store) QueryFederationExposedModules(
 
 		set         = make([]*federationType.ExposedModule, 0, DefaultSliceCapacity)
 		res         *federationType.ExposedModule
-		aux         auxFederationExposedModule
+		aux         *auxFederationExposedModule
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -9793,9 +9814,9 @@ func (s Store) QueryFederationExposedModules(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.FederationExposedModule != nil {
+	if s.Filters.FederationExposedModule != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.FederationExposedModule(f)
+		tExpr, f, err = s.Filters.FederationExposedModule(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = FederationExposedModuleFilter(f)
@@ -9817,7 +9838,7 @@ func (s Store) QueryFederationExposedModules(
 		}
 	}
 
-	query := federationExposedModuleSelectQuery(s.config.Dialect).Where(expr...)
+	query := federationExposedModuleSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableFederationExposedModuleFields()); err != nil {
@@ -9858,6 +9879,7 @@ func (s Store) QueryFederationExposedModules(
 			return
 		}
 
+		aux = new(auxFederationExposedModule)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for FederationExposedModule: %w", err)
 			return
@@ -9895,7 +9917,7 @@ func (s Store) LookupFederationExposedModuleByID(ctx context.Context, id uint64)
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationExposedModule)
-		lookup = federationExposedModuleSelectQuery(s.config.Dialect).Where(
+		lookup = federationExposedModuleSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -10014,7 +10036,7 @@ func (s Store) CreateFederationModuleMapping(ctx context.Context, rr ...*federat
 			return
 		}
 
-		if err = s.Exec(ctx, federationModuleMappingInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationModuleMappingInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10031,7 +10053,7 @@ func (s Store) UpdateFederationModuleMapping(ctx context.Context, rr ...*federat
 			return
 		}
 
-		if err = s.Exec(ctx, federationModuleMappingUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationModuleMappingUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10048,7 +10070,7 @@ func (s Store) UpsertFederationModuleMapping(ctx context.Context, rr ...*federat
 			return
 		}
 
-		if err = s.Exec(ctx, federationModuleMappingUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationModuleMappingUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10061,7 +10083,7 @@ func (s Store) UpsertFederationModuleMapping(ctx context.Context, rr ...*federat
 // This function is auto-generated
 func (s Store) DeleteFederationModuleMapping(ctx context.Context, rr ...*federationType.ModuleMapping) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, federationModuleMappingDeleteQuery(s.config.Dialect, federationModuleMappingPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, federationModuleMappingDeleteQuery(s.Dialect, federationModuleMappingPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -10073,12 +10095,12 @@ func (s Store) DeleteFederationModuleMapping(ctx context.Context, rr ...*federat
 //
 // This function is auto-generated
 func (s Store) DeleteFederationModuleMappingBy(ctx context.Context) error {
-	return s.Exec(ctx, federationModuleMappingDeleteQuery(s.config.Dialect, goqu.Ex{}))
+	return s.Exec(ctx, federationModuleMappingDeleteQuery(s.Dialect, goqu.Ex{}))
 }
 
 // TruncateFederationModuleMappings Deletes all rows from the federationModuleMapping collection
 func (s Store) TruncateFederationModuleMappings(ctx context.Context) error {
-	return s.Exec(ctx, federationModuleMappingTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, federationModuleMappingTruncateQuery(s.Dialect))
 }
 
 // SearchFederationModuleMappings returns (filtered) set of FederationModuleMappings
@@ -10270,7 +10292,7 @@ func (s Store) QueryFederationModuleMappings(
 
 		set         = make([]*federationType.ModuleMapping, 0, DefaultSliceCapacity)
 		res         *federationType.ModuleMapping
-		aux         auxFederationModuleMapping
+		aux         *auxFederationModuleMapping
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -10278,9 +10300,9 @@ func (s Store) QueryFederationModuleMappings(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.FederationModuleMapping != nil {
+	if s.Filters.FederationModuleMapping != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.FederationModuleMapping(f)
+		tExpr, f, err = s.Filters.FederationModuleMapping(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = FederationModuleMappingFilter(f)
@@ -10302,7 +10324,7 @@ func (s Store) QueryFederationModuleMappings(
 		}
 	}
 
-	query := federationModuleMappingSelectQuery(s.config.Dialect).Where(expr...)
+	query := federationModuleMappingSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableFederationModuleMappingFields()); err != nil {
@@ -10343,6 +10365,7 @@ func (s Store) QueryFederationModuleMappings(
 			return
 		}
 
+		aux = new(auxFederationModuleMapping)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for FederationModuleMapping: %w", err)
 			return
@@ -10380,7 +10403,7 @@ func (s Store) LookupFederationModuleMappingByFederationModuleIDComposeModuleIDC
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationModuleMapping)
-		lookup = federationModuleMappingSelectQuery(s.config.Dialect).Where(
+		lookup = federationModuleMappingSelectQuery(s.Dialect).Where(
 			goqu.I("federation_module_id").Eq(federationModuleID),
 			goqu.I("compose_module_id").Eq(composeModuleID),
 			goqu.I("compose_namespace_id").Eq(composeNamespaceID),
@@ -10424,7 +10447,7 @@ func (s Store) LookupFederationModuleMappingByFederationModuleID(ctx context.Con
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationModuleMapping)
-		lookup = federationModuleMappingSelectQuery(s.config.Dialect).Where(
+		lookup = federationModuleMappingSelectQuery(s.Dialect).Where(
 			goqu.I("federation_module_id").Eq(federationModuleID),
 		).Limit(1)
 	)
@@ -10501,7 +10524,7 @@ func (s Store) CreateFederationNode(ctx context.Context, rr ...*federationType.N
 			return
 		}
 
-		if err = s.Exec(ctx, federationNodeInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationNodeInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10518,7 +10541,7 @@ func (s Store) UpdateFederationNode(ctx context.Context, rr ...*federationType.N
 			return
 		}
 
-		if err = s.Exec(ctx, federationNodeUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationNodeUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10535,7 +10558,7 @@ func (s Store) UpsertFederationNode(ctx context.Context, rr ...*federationType.N
 			return
 		}
 
-		if err = s.Exec(ctx, federationNodeUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationNodeUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10548,7 +10571,7 @@ func (s Store) UpsertFederationNode(ctx context.Context, rr ...*federationType.N
 // This function is auto-generated
 func (s Store) DeleteFederationNode(ctx context.Context, rr ...*federationType.Node) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, federationNodeDeleteQuery(s.config.Dialect, federationNodePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, federationNodeDeleteQuery(s.Dialect, federationNodePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -10560,14 +10583,14 @@ func (s Store) DeleteFederationNode(ctx context.Context, rr ...*federationType.N
 //
 // This function is auto-generated
 func (s Store) DeleteFederationNodeByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, federationNodeDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, federationNodeDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateFederationNodes Deletes all rows from the federationNode collection
 func (s Store) TruncateFederationNodes(ctx context.Context) error {
-	return s.Exec(ctx, federationNodeTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, federationNodeTruncateQuery(s.Dialect))
 }
 
 // SearchFederationNodes returns (filtered) set of FederationNodes
@@ -10598,15 +10621,15 @@ func (s Store) QueryFederationNodes(
 
 		set         = make([]*federationType.Node, 0, DefaultSliceCapacity)
 		res         *federationType.Node
-		aux         auxFederationNode
+		aux         *auxFederationNode
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.FederationNode != nil {
+	if s.Filters.FederationNode != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.FederationNode(f)
+		tExpr, f, err = s.Filters.FederationNode(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = FederationNodeFilter(f)
@@ -10619,7 +10642,7 @@ func (s Store) QueryFederationNodes(
 
 	expr = append(expr, tExpr...)
 
-	query := federationNodeSelectQuery(s.config.Dialect).Where(expr...)
+	query := federationNodeSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -10650,6 +10673,7 @@ func (s Store) QueryFederationNodes(
 			return
 		}
 
+		aux = new(auxFederationNode)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for FederationNode: %w", err)
 			return
@@ -10687,7 +10711,7 @@ func (s Store) LookupFederationNodeByID(ctx context.Context, id uint64) (_ *fede
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationNode)
-		lookup = federationNodeSelectQuery(s.config.Dialect).Where(
+		lookup = federationNodeSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -10727,7 +10751,7 @@ func (s Store) LookupFederationNodeByBaseURLSharedNodeID(ctx context.Context, ba
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationNode)
-		lookup = federationNodeSelectQuery(s.config.Dialect).Where(
+		lookup = federationNodeSelectQuery(s.Dialect).Where(
 			goqu.I("base_url").Eq(baseURL),
 			goqu.I("shared_node_id").Eq(sharedNodeID),
 		).Limit(1)
@@ -10768,7 +10792,7 @@ func (s Store) LookupFederationNodeBySharedNodeID(ctx context.Context, sharedNod
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationNode)
-		lookup = federationNodeSelectQuery(s.config.Dialect).Where(
+		lookup = federationNodeSelectQuery(s.Dialect).Where(
 			goqu.I("shared_node_id").Eq(sharedNodeID),
 		).Limit(1)
 	)
@@ -10883,7 +10907,7 @@ func (s Store) CreateFederationNodeSync(ctx context.Context, rr ...*federationTy
 			return
 		}
 
-		if err = s.Exec(ctx, federationNodeSyncInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationNodeSyncInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10900,7 +10924,7 @@ func (s Store) UpdateFederationNodeSync(ctx context.Context, rr ...*federationTy
 			return
 		}
 
-		if err = s.Exec(ctx, federationNodeSyncUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationNodeSyncUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10917,7 +10941,7 @@ func (s Store) UpsertFederationNodeSync(ctx context.Context, rr ...*federationTy
 			return
 		}
 
-		if err = s.Exec(ctx, federationNodeSyncUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationNodeSyncUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -10930,7 +10954,7 @@ func (s Store) UpsertFederationNodeSync(ctx context.Context, rr ...*federationTy
 // This function is auto-generated
 func (s Store) DeleteFederationNodeSync(ctx context.Context, rr ...*federationType.NodeSync) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, federationNodeSyncDeleteQuery(s.config.Dialect, federationNodeSyncPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, federationNodeSyncDeleteQuery(s.Dialect, federationNodeSyncPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -10942,14 +10966,14 @@ func (s Store) DeleteFederationNodeSync(ctx context.Context, rr ...*federationTy
 //
 // This function is auto-generated
 func (s Store) DeleteFederationNodeSyncByNodeID(ctx context.Context, nodeID uint64) error {
-	return s.Exec(ctx, federationNodeSyncDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, federationNodeSyncDeleteQuery(s.Dialect, goqu.Ex{
 		"node_id": nodeID,
 	}))
 }
 
 // TruncateFederationNodeSyncs Deletes all rows from the federationNodeSync collection
 func (s Store) TruncateFederationNodeSyncs(ctx context.Context) error {
-	return s.Exec(ctx, federationNodeSyncTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, federationNodeSyncTruncateQuery(s.Dialect))
 }
 
 // SearchFederationNodeSyncs returns (filtered) set of FederationNodeSyncs
@@ -11141,7 +11165,7 @@ func (s Store) QueryFederationNodeSyncs(
 
 		set         = make([]*federationType.NodeSync, 0, DefaultSliceCapacity)
 		res         *federationType.NodeSync
-		aux         auxFederationNodeSync
+		aux         *auxFederationNodeSync
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -11149,9 +11173,9 @@ func (s Store) QueryFederationNodeSyncs(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.FederationNodeSync != nil {
+	if s.Filters.FederationNodeSync != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.FederationNodeSync(f)
+		tExpr, f, err = s.Filters.FederationNodeSync(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = FederationNodeSyncFilter(f)
@@ -11173,7 +11197,7 @@ func (s Store) QueryFederationNodeSyncs(
 		}
 	}
 
-	query := federationNodeSyncSelectQuery(s.config.Dialect).Where(expr...)
+	query := federationNodeSyncSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableFederationNodeSyncFields()); err != nil {
@@ -11214,6 +11238,7 @@ func (s Store) QueryFederationNodeSyncs(
 			return
 		}
 
+		aux = new(auxFederationNodeSync)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for FederationNodeSync: %w", err)
 			return
@@ -11251,7 +11276,7 @@ func (s Store) LookupFederationNodeSyncByNodeID(ctx context.Context, nodeID uint
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationNodeSync)
-		lookup = federationNodeSyncSelectQuery(s.config.Dialect).Where(
+		lookup = federationNodeSyncSelectQuery(s.Dialect).Where(
 			goqu.I("node_id").Eq(nodeID),
 		).Limit(1)
 	)
@@ -11293,7 +11318,7 @@ func (s Store) LookupFederationNodeSyncByNodeIDModuleIDSyncTypeSyncStatus(ctx co
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationNodeSync)
-		lookup = federationNodeSyncSelectQuery(s.config.Dialect).Where(
+		lookup = federationNodeSyncSelectQuery(s.Dialect).Where(
 			goqu.I("node_id").Eq(nodeID),
 			goqu.I("module_id").Eq(moduleID),
 			goqu.I("sync_type").Eq(syncType),
@@ -11404,7 +11429,7 @@ func (s Store) CreateFederationSharedModule(ctx context.Context, rr ...*federati
 			return
 		}
 
-		if err = s.Exec(ctx, federationSharedModuleInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationSharedModuleInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -11421,7 +11446,7 @@ func (s Store) UpdateFederationSharedModule(ctx context.Context, rr ...*federati
 			return
 		}
 
-		if err = s.Exec(ctx, federationSharedModuleUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationSharedModuleUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -11438,7 +11463,7 @@ func (s Store) UpsertFederationSharedModule(ctx context.Context, rr ...*federati
 			return
 		}
 
-		if err = s.Exec(ctx, federationSharedModuleUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, federationSharedModuleUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -11451,7 +11476,7 @@ func (s Store) UpsertFederationSharedModule(ctx context.Context, rr ...*federati
 // This function is auto-generated
 func (s Store) DeleteFederationSharedModule(ctx context.Context, rr ...*federationType.SharedModule) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, federationSharedModuleDeleteQuery(s.config.Dialect, federationSharedModulePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, federationSharedModuleDeleteQuery(s.Dialect, federationSharedModulePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -11463,14 +11488,14 @@ func (s Store) DeleteFederationSharedModule(ctx context.Context, rr ...*federati
 //
 // This function is auto-generated
 func (s Store) DeleteFederationSharedModuleByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, federationSharedModuleDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, federationSharedModuleDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateFederationSharedModules Deletes all rows from the federationSharedModule collection
 func (s Store) TruncateFederationSharedModules(ctx context.Context) error {
-	return s.Exec(ctx, federationSharedModuleTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, federationSharedModuleTruncateQuery(s.Dialect))
 }
 
 // SearchFederationSharedModules returns (filtered) set of FederationSharedModules
@@ -11662,7 +11687,7 @@ func (s Store) QueryFederationSharedModules(
 
 		set         = make([]*federationType.SharedModule, 0, DefaultSliceCapacity)
 		res         *federationType.SharedModule
-		aux         auxFederationSharedModule
+		aux         *auxFederationSharedModule
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -11670,9 +11695,9 @@ func (s Store) QueryFederationSharedModules(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.FederationSharedModule != nil {
+	if s.Filters.FederationSharedModule != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.FederationSharedModule(f)
+		tExpr, f, err = s.Filters.FederationSharedModule(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = FederationSharedModuleFilter(f)
@@ -11694,7 +11719,7 @@ func (s Store) QueryFederationSharedModules(
 		}
 	}
 
-	query := federationSharedModuleSelectQuery(s.config.Dialect).Where(expr...)
+	query := federationSharedModuleSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableFederationSharedModuleFields()); err != nil {
@@ -11735,6 +11760,7 @@ func (s Store) QueryFederationSharedModules(
 			return
 		}
 
+		aux = new(auxFederationSharedModule)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for FederationSharedModule: %w", err)
 			return
@@ -11772,7 +11798,7 @@ func (s Store) LookupFederationSharedModuleByID(ctx context.Context, id uint64) 
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFederationSharedModule)
-		lookup = federationSharedModuleSelectQuery(s.config.Dialect).Where(
+		lookup = federationSharedModuleSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -11891,7 +11917,7 @@ func (s Store) CreateFlag(ctx context.Context, rr ...*flagType.Flag) (err error)
 			return
 		}
 
-		if err = s.Exec(ctx, flagInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, flagInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -11908,7 +11934,7 @@ func (s Store) UpdateFlag(ctx context.Context, rr ...*flagType.Flag) (err error)
 			return
 		}
 
-		if err = s.Exec(ctx, flagUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, flagUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -11925,7 +11951,7 @@ func (s Store) UpsertFlag(ctx context.Context, rr ...*flagType.Flag) (err error)
 			return
 		}
 
-		if err = s.Exec(ctx, flagUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, flagUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -11938,7 +11964,7 @@ func (s Store) UpsertFlag(ctx context.Context, rr ...*flagType.Flag) (err error)
 // This function is auto-generated
 func (s Store) DeleteFlag(ctx context.Context, rr ...*flagType.Flag) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, flagDeleteQuery(s.config.Dialect, flagPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, flagDeleteQuery(s.Dialect, flagPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -11950,7 +11976,7 @@ func (s Store) DeleteFlag(ctx context.Context, rr ...*flagType.Flag) (err error)
 //
 // This function is auto-generated
 func (s Store) DeleteFlagByKindResourceIDOwnedByName(ctx context.Context, kind string, resourceID uint64, ownedBy uint64, name string) error {
-	return s.Exec(ctx, flagDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, flagDeleteQuery(s.Dialect, goqu.Ex{
 		"kind":         kind,
 		"rel_resource": resourceID,
 		"owned_by":     ownedBy,
@@ -11960,7 +11986,7 @@ func (s Store) DeleteFlagByKindResourceIDOwnedByName(ctx context.Context, kind s
 
 // TruncateFlags Deletes all rows from the flag collection
 func (s Store) TruncateFlags(ctx context.Context) error {
-	return s.Exec(ctx, flagTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, flagTruncateQuery(s.Dialect))
 }
 
 // SearchFlags returns (filtered) set of Flags
@@ -11989,15 +12015,15 @@ func (s Store) QueryFlags(
 	var (
 		set         = make([]*flagType.Flag, 0, DefaultSliceCapacity)
 		res         *flagType.Flag
-		aux         auxFlag
+		aux         *auxFlag
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.Flag != nil {
+	if s.Filters.Flag != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Flag(f)
+		tExpr, f, err = s.Filters.Flag(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = FlagFilter(f)
@@ -12010,7 +12036,7 @@ func (s Store) QueryFlags(
 
 	expr = append(expr, tExpr...)
 
-	query := flagSelectQuery(s.config.Dialect).Where(expr...)
+	query := flagSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -12041,6 +12067,7 @@ func (s Store) QueryFlags(
 			return
 		}
 
+		aux = new(auxFlag)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Flag: %w", err)
 			return
@@ -12066,11 +12093,11 @@ func (s Store) LookupFlagByKindResourceIDOwnedByName(ctx context.Context, kind s
 	var (
 		rows   *sql.Rows
 		aux    = new(auxFlag)
-		lookup = flagSelectQuery(s.config.Dialect).Where(
+		lookup = flagSelectQuery(s.Dialect).Where(
 			goqu.I("kind").Eq(kind),
 			goqu.I("rel_resource").Eq(resourceID),
 			goqu.I("owned_by").Eq(ownedBy),
-			s.config.Functions.LOWER(goqu.I("name")).Eq(strings.ToLower(name)),
+			s.Functions.LOWER(goqu.I("name")).Eq(strings.ToLower(name)),
 		).Limit(1)
 	)
 
@@ -12198,7 +12225,7 @@ func (s Store) CreateLabel(ctx context.Context, rr ...*labelsType.Label) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, labelInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, labelInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -12215,7 +12242,7 @@ func (s Store) UpdateLabel(ctx context.Context, rr ...*labelsType.Label) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, labelUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, labelUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -12232,7 +12259,7 @@ func (s Store) UpsertLabel(ctx context.Context, rr ...*labelsType.Label) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, labelUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, labelUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -12245,7 +12272,7 @@ func (s Store) UpsertLabel(ctx context.Context, rr ...*labelsType.Label) (err er
 // This function is auto-generated
 func (s Store) DeleteLabel(ctx context.Context, rr ...*labelsType.Label) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, labelDeleteQuery(s.config.Dialect, labelPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, labelDeleteQuery(s.Dialect, labelPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -12257,7 +12284,7 @@ func (s Store) DeleteLabel(ctx context.Context, rr ...*labelsType.Label) (err er
 //
 // This function is auto-generated
 func (s Store) DeleteLabelByKindResourceIDName(ctx context.Context, kind string, resourceID uint64, name string) error {
-	return s.Exec(ctx, labelDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, labelDeleteQuery(s.Dialect, goqu.Ex{
 		"kind":         kind,
 		"rel_resource": resourceID,
 		"name":         name,
@@ -12266,7 +12293,7 @@ func (s Store) DeleteLabelByKindResourceIDName(ctx context.Context, kind string,
 
 // TruncateLabels Deletes all rows from the label collection
 func (s Store) TruncateLabels(ctx context.Context) error {
-	return s.Exec(ctx, labelTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, labelTruncateQuery(s.Dialect))
 }
 
 // SearchLabels returns (filtered) set of Labels
@@ -12295,15 +12322,15 @@ func (s Store) QueryLabels(
 	var (
 		set         = make([]*labelsType.Label, 0, DefaultSliceCapacity)
 		res         *labelsType.Label
-		aux         auxLabel
+		aux         *auxLabel
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.Label != nil {
+	if s.Filters.Label != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Label(f)
+		tExpr, f, err = s.Filters.Label(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = LabelFilter(f)
@@ -12316,7 +12343,7 @@ func (s Store) QueryLabels(
 
 	expr = append(expr, tExpr...)
 
-	query := labelSelectQuery(s.config.Dialect).Where(expr...)
+	query := labelSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -12347,6 +12374,7 @@ func (s Store) QueryLabels(
 			return
 		}
 
+		aux = new(auxLabel)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Label: %w", err)
 			return
@@ -12372,10 +12400,10 @@ func (s Store) LookupLabelByKindResourceIDName(ctx context.Context, kind string,
 	var (
 		rows   *sql.Rows
 		aux    = new(auxLabel)
-		lookup = labelSelectQuery(s.config.Dialect).Where(
+		lookup = labelSelectQuery(s.Dialect).Where(
 			goqu.I("kind").Eq(kind),
 			goqu.I("rel_resource").Eq(resourceID),
-			s.config.Functions.LOWER(goqu.I("name")).Eq(strings.ToLower(name)),
+			s.Functions.LOWER(goqu.I("name")).Eq(strings.ToLower(name)),
 		).Limit(1)
 	)
 
@@ -12494,7 +12522,7 @@ func (s Store) CreateQueue(ctx context.Context, rr ...*systemType.Queue) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, queueInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, queueInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -12511,7 +12539,7 @@ func (s Store) UpdateQueue(ctx context.Context, rr ...*systemType.Queue) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, queueUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, queueUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -12528,7 +12556,7 @@ func (s Store) UpsertQueue(ctx context.Context, rr ...*systemType.Queue) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, queueUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, queueUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -12541,7 +12569,7 @@ func (s Store) UpsertQueue(ctx context.Context, rr ...*systemType.Queue) (err er
 // This function is auto-generated
 func (s Store) DeleteQueue(ctx context.Context, rr ...*systemType.Queue) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, queueDeleteQuery(s.config.Dialect, queuePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, queueDeleteQuery(s.Dialect, queuePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -12553,14 +12581,14 @@ func (s Store) DeleteQueue(ctx context.Context, rr ...*systemType.Queue) (err er
 //
 // This function is auto-generated
 func (s Store) DeleteQueueByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, queueDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, queueDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateQueues Deletes all rows from the queue collection
 func (s Store) TruncateQueues(ctx context.Context) error {
-	return s.Exec(ctx, queueTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, queueTruncateQuery(s.Dialect))
 }
 
 // SearchQueues returns (filtered) set of Queues
@@ -12752,7 +12780,7 @@ func (s Store) QueryQueues(
 
 		set         = make([]*systemType.Queue, 0, DefaultSliceCapacity)
 		res         *systemType.Queue
-		aux         auxQueue
+		aux         *auxQueue
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -12760,9 +12788,9 @@ func (s Store) QueryQueues(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Queue != nil {
+	if s.Filters.Queue != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Queue(f)
+		tExpr, f, err = s.Filters.Queue(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = QueueFilter(f)
@@ -12784,7 +12812,7 @@ func (s Store) QueryQueues(
 		}
 	}
 
-	query := queueSelectQuery(s.config.Dialect).Where(expr...)
+	query := queueSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableQueueFields()); err != nil {
@@ -12825,6 +12853,7 @@ func (s Store) QueryQueues(
 			return
 		}
 
+		aux = new(auxQueue)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Queue: %w", err)
 			return
@@ -12860,7 +12889,7 @@ func (s Store) LookupQueueByID(ctx context.Context, id uint64) (_ *systemType.Qu
 	var (
 		rows   *sql.Rows
 		aux    = new(auxQueue)
-		lookup = queueSelectQuery(s.config.Dialect).Where(
+		lookup = queueSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -12900,7 +12929,7 @@ func (s Store) LookupQueueByQueue(ctx context.Context, queue string) (_ *systemT
 	var (
 		rows   *sql.Rows
 		aux    = new(auxQueue)
-		lookup = queueSelectQuery(s.config.Dialect).Where(
+		lookup = queueSelectQuery(s.Dialect).Where(
 			goqu.I("queue").Eq(queue),
 		).Limit(1)
 	)
@@ -13015,7 +13044,7 @@ func (s Store) CreateQueueMessage(ctx context.Context, rr ...*systemType.QueueMe
 			return
 		}
 
-		if err = s.Exec(ctx, queueMessageInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, queueMessageInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13032,7 +13061,7 @@ func (s Store) UpdateQueueMessage(ctx context.Context, rr ...*systemType.QueueMe
 			return
 		}
 
-		if err = s.Exec(ctx, queueMessageUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, queueMessageUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13049,7 +13078,7 @@ func (s Store) UpsertQueueMessage(ctx context.Context, rr ...*systemType.QueueMe
 			return
 		}
 
-		if err = s.Exec(ctx, queueMessageUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, queueMessageUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13062,7 +13091,7 @@ func (s Store) UpsertQueueMessage(ctx context.Context, rr ...*systemType.QueueMe
 // This function is auto-generated
 func (s Store) DeleteQueueMessage(ctx context.Context, rr ...*systemType.QueueMessage) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, queueMessageDeleteQuery(s.config.Dialect, queueMessagePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, queueMessageDeleteQuery(s.Dialect, queueMessagePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -13074,14 +13103,14 @@ func (s Store) DeleteQueueMessage(ctx context.Context, rr ...*systemType.QueueMe
 //
 // This function is auto-generated
 func (s Store) DeleteQueueMessageByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, queueMessageDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, queueMessageDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateQueueMessages Deletes all rows from the queueMessage collection
 func (s Store) TruncateQueueMessages(ctx context.Context) error {
-	return s.Exec(ctx, queueMessageTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, queueMessageTruncateQuery(s.Dialect))
 }
 
 // SearchQueueMessages returns (filtered) set of QueueMessages
@@ -13271,7 +13300,7 @@ func (s Store) QueryQueueMessages(
 	var (
 		set         = make([]*systemType.QueueMessage, 0, DefaultSliceCapacity)
 		res         *systemType.QueueMessage
-		aux         auxQueueMessage
+		aux         *auxQueueMessage
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -13279,9 +13308,9 @@ func (s Store) QueryQueueMessages(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.QueueMessage != nil {
+	if s.Filters.QueueMessage != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.QueueMessage(f)
+		tExpr, f, err = s.Filters.QueueMessage(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = QueueMessageFilter(f)
@@ -13303,7 +13332,7 @@ func (s Store) QueryQueueMessages(
 		}
 	}
 
-	query := queueMessageSelectQuery(s.config.Dialect).Where(expr...)
+	query := queueMessageSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableQueueMessageFields()); err != nil {
@@ -13344,6 +13373,7 @@ func (s Store) QueryQueueMessages(
 			return
 		}
 
+		aux = new(auxQueueMessage)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for QueueMessage: %w", err)
 			return
@@ -13438,7 +13468,7 @@ func (s Store) CreateRbacRule(ctx context.Context, rr ...*rbacType.Rule) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, rbacRuleInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, rbacRuleInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13455,7 +13485,7 @@ func (s Store) UpdateRbacRule(ctx context.Context, rr ...*rbacType.Rule) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, rbacRuleUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, rbacRuleUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13472,7 +13502,7 @@ func (s Store) UpsertRbacRule(ctx context.Context, rr ...*rbacType.Rule) (err er
 			return
 		}
 
-		if err = s.Exec(ctx, rbacRuleUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, rbacRuleUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13485,7 +13515,7 @@ func (s Store) UpsertRbacRule(ctx context.Context, rr ...*rbacType.Rule) (err er
 // This function is auto-generated
 func (s Store) DeleteRbacRule(ctx context.Context, rr ...*rbacType.Rule) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, rbacRuleDeleteQuery(s.config.Dialect, rbacRulePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, rbacRuleDeleteQuery(s.Dialect, rbacRulePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -13497,7 +13527,7 @@ func (s Store) DeleteRbacRule(ctx context.Context, rr ...*rbacType.Rule) (err er
 //
 // This function is auto-generated
 func (s Store) DeleteRbacRuleByRoleIDResourceOperation(ctx context.Context, roleID uint64, resource string, operation string) error {
-	return s.Exec(ctx, rbacRuleDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, rbacRuleDeleteQuery(s.Dialect, goqu.Ex{
 		"rel_role":  roleID,
 		"resource":  resource,
 		"operation": operation,
@@ -13506,7 +13536,7 @@ func (s Store) DeleteRbacRuleByRoleIDResourceOperation(ctx context.Context, role
 
 // TruncateRbacRules Deletes all rows from the rbacRule collection
 func (s Store) TruncateRbacRules(ctx context.Context) error {
-	return s.Exec(ctx, rbacRuleTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, rbacRuleTruncateQuery(s.Dialect))
 }
 
 // SearchRbacRules returns (filtered) set of RbacRules
@@ -13535,15 +13565,15 @@ func (s Store) QueryRbacRules(
 	var (
 		set         = make([]*rbacType.Rule, 0, DefaultSliceCapacity)
 		res         *rbacType.Rule
-		aux         auxRbacRule
+		aux         *auxRbacRule
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.RbacRule != nil {
+	if s.Filters.RbacRule != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.RbacRule(f)
+		tExpr, f, err = s.Filters.RbacRule(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = RbacRuleFilter(f)
@@ -13556,7 +13586,7 @@ func (s Store) QueryRbacRules(
 
 	expr = append(expr, tExpr...)
 
-	query := rbacRuleSelectQuery(s.config.Dialect).Where(expr...)
+	query := rbacRuleSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -13587,6 +13617,7 @@ func (s Store) QueryRbacRules(
 			return
 		}
 
+		aux = new(auxRbacRule)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for RbacRule: %w", err)
 			return
@@ -13692,7 +13723,7 @@ func (s Store) CreateReminder(ctx context.Context, rr ...*systemType.Reminder) (
 			return
 		}
 
-		if err = s.Exec(ctx, reminderInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, reminderInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13709,7 +13740,7 @@ func (s Store) UpdateReminder(ctx context.Context, rr ...*systemType.Reminder) (
 			return
 		}
 
-		if err = s.Exec(ctx, reminderUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, reminderUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13726,7 +13757,7 @@ func (s Store) UpsertReminder(ctx context.Context, rr ...*systemType.Reminder) (
 			return
 		}
 
-		if err = s.Exec(ctx, reminderUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, reminderUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -13739,7 +13770,7 @@ func (s Store) UpsertReminder(ctx context.Context, rr ...*systemType.Reminder) (
 // This function is auto-generated
 func (s Store) DeleteReminder(ctx context.Context, rr ...*systemType.Reminder) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, reminderDeleteQuery(s.config.Dialect, reminderPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, reminderDeleteQuery(s.Dialect, reminderPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -13751,14 +13782,14 @@ func (s Store) DeleteReminder(ctx context.Context, rr ...*systemType.Reminder) (
 //
 // This function is auto-generated
 func (s Store) DeleteReminderByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, reminderDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, reminderDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateReminders Deletes all rows from the reminder collection
 func (s Store) TruncateReminders(ctx context.Context) error {
-	return s.Exec(ctx, reminderTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, reminderTruncateQuery(s.Dialect))
 }
 
 // SearchReminders returns (filtered) set of Reminders
@@ -13950,7 +13981,7 @@ func (s Store) QueryReminders(
 
 		set         = make([]*systemType.Reminder, 0, DefaultSliceCapacity)
 		res         *systemType.Reminder
-		aux         auxReminder
+		aux         *auxReminder
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -13958,9 +13989,9 @@ func (s Store) QueryReminders(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Reminder != nil {
+	if s.Filters.Reminder != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Reminder(f)
+		tExpr, f, err = s.Filters.Reminder(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ReminderFilter(f)
@@ -13982,7 +14013,7 @@ func (s Store) QueryReminders(
 		}
 	}
 
-	query := reminderSelectQuery(s.config.Dialect).Where(expr...)
+	query := reminderSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableReminderFields()); err != nil {
@@ -14023,6 +14054,7 @@ func (s Store) QueryReminders(
 			return
 		}
 
+		aux = new(auxReminder)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Reminder: %w", err)
 			return
@@ -14058,7 +14090,7 @@ func (s Store) LookupReminderByID(ctx context.Context, id uint64) (_ *systemType
 	var (
 		rows   *sql.Rows
 		aux    = new(auxReminder)
-		lookup = reminderSelectQuery(s.config.Dialect).Where(
+		lookup = reminderSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -14185,7 +14217,7 @@ func (s Store) CreateReport(ctx context.Context, rr ...*systemType.Report) (err 
 			return
 		}
 
-		if err = s.Exec(ctx, reportInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, reportInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14202,7 +14234,7 @@ func (s Store) UpdateReport(ctx context.Context, rr ...*systemType.Report) (err 
 			return
 		}
 
-		if err = s.Exec(ctx, reportUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, reportUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14219,7 +14251,7 @@ func (s Store) UpsertReport(ctx context.Context, rr ...*systemType.Report) (err 
 			return
 		}
 
-		if err = s.Exec(ctx, reportUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, reportUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14232,7 +14264,7 @@ func (s Store) UpsertReport(ctx context.Context, rr ...*systemType.Report) (err 
 // This function is auto-generated
 func (s Store) DeleteReport(ctx context.Context, rr ...*systemType.Report) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, reportDeleteQuery(s.config.Dialect, reportPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, reportDeleteQuery(s.Dialect, reportPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -14244,14 +14276,14 @@ func (s Store) DeleteReport(ctx context.Context, rr ...*systemType.Report) (err 
 //
 // This function is auto-generated
 func (s Store) DeleteReportByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, reportDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, reportDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateReports Deletes all rows from the report collection
 func (s Store) TruncateReports(ctx context.Context) error {
-	return s.Exec(ctx, reportTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, reportTruncateQuery(s.Dialect))
 }
 
 // SearchReports returns (filtered) set of Reports
@@ -14443,7 +14475,7 @@ func (s Store) QueryReports(
 
 		set         = make([]*systemType.Report, 0, DefaultSliceCapacity)
 		res         *systemType.Report
-		aux         auxReport
+		aux         *auxReport
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -14451,9 +14483,9 @@ func (s Store) QueryReports(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Report != nil {
+	if s.Filters.Report != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Report(f)
+		tExpr, f, err = s.Filters.Report(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ReportFilter(f)
@@ -14475,7 +14507,7 @@ func (s Store) QueryReports(
 		}
 	}
 
-	query := reportSelectQuery(s.config.Dialect).Where(expr...)
+	query := reportSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableReportFields()); err != nil {
@@ -14516,6 +14548,7 @@ func (s Store) QueryReports(
 			return
 		}
 
+		aux = new(auxReport)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Report: %w", err)
 			return
@@ -14553,7 +14586,7 @@ func (s Store) LookupReportByID(ctx context.Context, id uint64) (_ *systemType.R
 	var (
 		rows   *sql.Rows
 		aux    = new(auxReport)
-		lookup = reportSelectQuery(s.config.Dialect).Where(
+		lookup = reportSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -14595,8 +14628,8 @@ func (s Store) LookupReportByHandle(ctx context.Context, handle string) (_ *syst
 	var (
 		rows   *sql.Rows
 		aux    = new(auxReport)
-		lookup = reportSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+		lookup = reportSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -14742,7 +14775,7 @@ func (s Store) CreateResourceActivity(ctx context.Context, rr ...*discoveryType.
 			return
 		}
 
-		if err = s.Exec(ctx, resourceActivityInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, resourceActivityInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14759,7 +14792,7 @@ func (s Store) UpdateResourceActivity(ctx context.Context, rr ...*discoveryType.
 			return
 		}
 
-		if err = s.Exec(ctx, resourceActivityUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, resourceActivityUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14776,7 +14809,7 @@ func (s Store) UpsertResourceActivity(ctx context.Context, rr ...*discoveryType.
 			return
 		}
 
-		if err = s.Exec(ctx, resourceActivityUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, resourceActivityUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14789,7 +14822,7 @@ func (s Store) UpsertResourceActivity(ctx context.Context, rr ...*discoveryType.
 // This function is auto-generated
 func (s Store) DeleteResourceActivity(ctx context.Context, rr ...*discoveryType.ResourceActivity) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, resourceActivityDeleteQuery(s.config.Dialect, resourceActivityPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, resourceActivityDeleteQuery(s.Dialect, resourceActivityPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -14801,14 +14834,14 @@ func (s Store) DeleteResourceActivity(ctx context.Context, rr ...*discoveryType.
 //
 // This function is auto-generated
 func (s Store) DeleteResourceActivityByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, resourceActivityDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, resourceActivityDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateResourceActivitys Deletes all rows from the resourceActivity collection
 func (s Store) TruncateResourceActivitys(ctx context.Context) error {
-	return s.Exec(ctx, resourceActivityTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, resourceActivityTruncateQuery(s.Dialect))
 }
 
 // SearchResourceActivitys returns (filtered) set of ResourceActivitys
@@ -14837,15 +14870,15 @@ func (s Store) QueryResourceActivitys(
 	var (
 		set         = make([]*discoveryType.ResourceActivity, 0, DefaultSliceCapacity)
 		res         *discoveryType.ResourceActivity
-		aux         auxResourceActivity
+		aux         *auxResourceActivity
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.ResourceActivity != nil {
+	if s.Filters.ResourceActivity != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ResourceActivity(f)
+		tExpr, f, err = s.Filters.ResourceActivity(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ResourceActivityFilter(f)
@@ -14858,7 +14891,7 @@ func (s Store) QueryResourceActivitys(
 
 	expr = append(expr, tExpr...)
 
-	query := resourceActivitySelectQuery(s.config.Dialect).Where(expr...)
+	query := resourceActivitySelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -14889,6 +14922,7 @@ func (s Store) QueryResourceActivitys(
 			return
 		}
 
+		aux = new(auxResourceActivity)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ResourceActivity: %w", err)
 			return
@@ -14980,7 +15014,7 @@ func (s Store) CreateResourceTranslation(ctx context.Context, rr ...*systemType.
 			return
 		}
 
-		if err = s.Exec(ctx, resourceTranslationInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, resourceTranslationInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -14997,7 +15031,7 @@ func (s Store) UpdateResourceTranslation(ctx context.Context, rr ...*systemType.
 			return
 		}
 
-		if err = s.Exec(ctx, resourceTranslationUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, resourceTranslationUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -15014,7 +15048,7 @@ func (s Store) UpsertResourceTranslation(ctx context.Context, rr ...*systemType.
 			return
 		}
 
-		if err = s.Exec(ctx, resourceTranslationUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, resourceTranslationUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -15027,7 +15061,7 @@ func (s Store) UpsertResourceTranslation(ctx context.Context, rr ...*systemType.
 // This function is auto-generated
 func (s Store) DeleteResourceTranslation(ctx context.Context, rr ...*systemType.ResourceTranslation) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, resourceTranslationDeleteQuery(s.config.Dialect, resourceTranslationPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, resourceTranslationDeleteQuery(s.Dialect, resourceTranslationPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -15039,14 +15073,14 @@ func (s Store) DeleteResourceTranslation(ctx context.Context, rr ...*systemType.
 //
 // This function is auto-generated
 func (s Store) DeleteResourceTranslationByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, resourceTranslationDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, resourceTranslationDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateResourceTranslations Deletes all rows from the resourceTranslation collection
 func (s Store) TruncateResourceTranslations(ctx context.Context) error {
-	return s.Exec(ctx, resourceTranslationTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, resourceTranslationTruncateQuery(s.Dialect))
 }
 
 // SearchResourceTranslations returns (filtered) set of ResourceTranslations
@@ -15236,7 +15270,7 @@ func (s Store) QueryResourceTranslations(
 	var (
 		set         = make([]*systemType.ResourceTranslation, 0, DefaultSliceCapacity)
 		res         *systemType.ResourceTranslation
-		aux         auxResourceTranslation
+		aux         *auxResourceTranslation
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -15244,9 +15278,9 @@ func (s Store) QueryResourceTranslations(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.ResourceTranslation != nil {
+	if s.Filters.ResourceTranslation != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.ResourceTranslation(f)
+		tExpr, f, err = s.Filters.ResourceTranslation(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = ResourceTranslationFilter(f)
@@ -15268,7 +15302,7 @@ func (s Store) QueryResourceTranslations(
 		}
 	}
 
-	query := resourceTranslationSelectQuery(s.config.Dialect).Where(expr...)
+	query := resourceTranslationSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableResourceTranslationFields()); err != nil {
@@ -15309,6 +15343,7 @@ func (s Store) QueryResourceTranslations(
 			return
 		}
 
+		aux = new(auxResourceTranslation)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for ResourceTranslation: %w", err)
 			return
@@ -15335,7 +15370,7 @@ func (s Store) LookupResourceTranslationByID(ctx context.Context, id uint64) (_ 
 	var (
 		rows   *sql.Rows
 		aux    = new(auxResourceTranslation)
-		lookup = resourceTranslationSelectQuery(s.config.Dialect).Where(
+		lookup = resourceTranslationSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -15450,7 +15485,7 @@ func (s Store) CreateRole(ctx context.Context, rr ...*systemType.Role) (err erro
 			return
 		}
 
-		if err = s.Exec(ctx, roleInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, roleInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -15467,7 +15502,7 @@ func (s Store) UpdateRole(ctx context.Context, rr ...*systemType.Role) (err erro
 			return
 		}
 
-		if err = s.Exec(ctx, roleUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, roleUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -15484,7 +15519,7 @@ func (s Store) UpsertRole(ctx context.Context, rr ...*systemType.Role) (err erro
 			return
 		}
 
-		if err = s.Exec(ctx, roleUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, roleUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -15497,7 +15532,7 @@ func (s Store) UpsertRole(ctx context.Context, rr ...*systemType.Role) (err erro
 // This function is auto-generated
 func (s Store) DeleteRole(ctx context.Context, rr ...*systemType.Role) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, roleDeleteQuery(s.config.Dialect, rolePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, roleDeleteQuery(s.Dialect, rolePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -15509,14 +15544,14 @@ func (s Store) DeleteRole(ctx context.Context, rr ...*systemType.Role) (err erro
 //
 // This function is auto-generated
 func (s Store) DeleteRoleByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, roleDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, roleDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateRoles Deletes all rows from the role collection
 func (s Store) TruncateRoles(ctx context.Context) error {
-	return s.Exec(ctx, roleTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, roleTruncateQuery(s.Dialect))
 }
 
 // SearchRoles returns (filtered) set of Roles
@@ -15708,7 +15743,7 @@ func (s Store) QueryRoles(
 
 		set         = make([]*systemType.Role, 0, DefaultSliceCapacity)
 		res         *systemType.Role
-		aux         auxRole
+		aux         *auxRole
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -15716,9 +15751,9 @@ func (s Store) QueryRoles(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Role != nil {
+	if s.Filters.Role != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Role(f)
+		tExpr, f, err = s.Filters.Role(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = RoleFilter(f)
@@ -15740,7 +15775,7 @@ func (s Store) QueryRoles(
 		}
 	}
 
-	query := roleSelectQuery(s.config.Dialect).Where(expr...)
+	query := roleSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableRoleFields()); err != nil {
@@ -15781,6 +15816,7 @@ func (s Store) QueryRoles(
 			return
 		}
 
+		aux = new(auxRole)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Role: %w", err)
 			return
@@ -15818,7 +15854,7 @@ func (s Store) LookupRoleByID(ctx context.Context, id uint64) (_ *systemType.Rol
 	var (
 		rows   *sql.Rows
 		aux    = new(auxRole)
-		lookup = roleSelectQuery(s.config.Dialect).Where(
+		lookup = roleSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -15860,8 +15896,8 @@ func (s Store) LookupRoleByHandle(ctx context.Context, handle string) (_ *system
 	var (
 		rows   *sql.Rows
 		aux    = new(auxRole)
-		lookup = roleSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+		lookup = roleSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -15903,7 +15939,7 @@ func (s Store) LookupRoleByName(ctx context.Context, name string) (_ *systemType
 	var (
 		rows   *sql.Rows
 		aux    = new(auxRole)
-		lookup = roleSelectQuery(s.config.Dialect).Where(
+		lookup = roleSelectQuery(s.Dialect).Where(
 			goqu.I("name").Eq(name),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
@@ -16081,7 +16117,7 @@ func (s Store) CreateRoleMember(ctx context.Context, rr ...*systemType.RoleMembe
 			return
 		}
 
-		if err = s.Exec(ctx, roleMemberInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, roleMemberInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16098,7 +16134,7 @@ func (s Store) UpdateRoleMember(ctx context.Context, rr ...*systemType.RoleMembe
 			return
 		}
 
-		if err = s.Exec(ctx, roleMemberUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, roleMemberUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16115,7 +16151,7 @@ func (s Store) UpsertRoleMember(ctx context.Context, rr ...*systemType.RoleMembe
 			return
 		}
 
-		if err = s.Exec(ctx, roleMemberUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, roleMemberUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16128,7 +16164,7 @@ func (s Store) UpsertRoleMember(ctx context.Context, rr ...*systemType.RoleMembe
 // This function is auto-generated
 func (s Store) DeleteRoleMember(ctx context.Context, rr ...*systemType.RoleMember) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, roleMemberDeleteQuery(s.config.Dialect, roleMemberPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, roleMemberDeleteQuery(s.Dialect, roleMemberPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -16140,7 +16176,7 @@ func (s Store) DeleteRoleMember(ctx context.Context, rr ...*systemType.RoleMembe
 //
 // This function is auto-generated
 func (s Store) DeleteRoleMemberByUserIDRoleID(ctx context.Context, userID uint64, roleID uint64) error {
-	return s.Exec(ctx, roleMemberDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, roleMemberDeleteQuery(s.Dialect, goqu.Ex{
 		"rel_user": userID,
 		"rel_role": roleID,
 	}))
@@ -16148,7 +16184,7 @@ func (s Store) DeleteRoleMemberByUserIDRoleID(ctx context.Context, userID uint64
 
 // TruncateRoleMembers Deletes all rows from the roleMember collection
 func (s Store) TruncateRoleMembers(ctx context.Context) error {
-	return s.Exec(ctx, roleMemberTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, roleMemberTruncateQuery(s.Dialect))
 }
 
 // SearchRoleMembers returns (filtered) set of RoleMembers
@@ -16177,15 +16213,15 @@ func (s Store) QueryRoleMembers(
 	var (
 		set         = make([]*systemType.RoleMember, 0, DefaultSliceCapacity)
 		res         *systemType.RoleMember
-		aux         auxRoleMember
+		aux         *auxRoleMember
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.RoleMember != nil {
+	if s.Filters.RoleMember != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.RoleMember(f)
+		tExpr, f, err = s.Filters.RoleMember(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = RoleMemberFilter(f)
@@ -16198,7 +16234,7 @@ func (s Store) QueryRoleMembers(
 
 	expr = append(expr, tExpr...)
 
-	query := roleMemberSelectQuery(s.config.Dialect).Where(expr...)
+	query := roleMemberSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -16229,6 +16265,7 @@ func (s Store) QueryRoleMembers(
 			return
 		}
 
+		aux = new(auxRoleMember)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for RoleMember: %w", err)
 			return
@@ -16327,7 +16364,7 @@ func (s Store) CreateSettingValue(ctx context.Context, rr ...*systemType.Setting
 			return
 		}
 
-		if err = s.Exec(ctx, settingValueInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, settingValueInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16344,7 +16381,7 @@ func (s Store) UpdateSettingValue(ctx context.Context, rr ...*systemType.Setting
 			return
 		}
 
-		if err = s.Exec(ctx, settingValueUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, settingValueUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16361,7 +16398,7 @@ func (s Store) UpsertSettingValue(ctx context.Context, rr ...*systemType.Setting
 			return
 		}
 
-		if err = s.Exec(ctx, settingValueUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, settingValueUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16374,7 +16411,7 @@ func (s Store) UpsertSettingValue(ctx context.Context, rr ...*systemType.Setting
 // This function is auto-generated
 func (s Store) DeleteSettingValue(ctx context.Context, rr ...*systemType.SettingValue) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, settingValueDeleteQuery(s.config.Dialect, settingValuePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, settingValueDeleteQuery(s.Dialect, settingValuePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -16386,7 +16423,7 @@ func (s Store) DeleteSettingValue(ctx context.Context, rr ...*systemType.Setting
 //
 // This function is auto-generated
 func (s Store) DeleteSettingValueByNameOwnedBy(ctx context.Context, name string, ownedBy uint64) error {
-	return s.Exec(ctx, settingValueDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, settingValueDeleteQuery(s.Dialect, goqu.Ex{
 		"name":      name,
 		"rel_owner": ownedBy,
 	}))
@@ -16394,7 +16431,7 @@ func (s Store) DeleteSettingValueByNameOwnedBy(ctx context.Context, name string,
 
 // TruncateSettingValues Deletes all rows from the settingValue collection
 func (s Store) TruncateSettingValues(ctx context.Context) error {
-	return s.Exec(ctx, settingValueTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, settingValueTruncateQuery(s.Dialect))
 }
 
 // SearchSettingValues returns (filtered) set of SettingValues
@@ -16423,15 +16460,15 @@ func (s Store) QuerySettingValues(
 	var (
 		set         = make([]*systemType.SettingValue, 0, DefaultSliceCapacity)
 		res         *systemType.SettingValue
-		aux         auxSettingValue
+		aux         *auxSettingValue
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
 	)
 
-	if s.config.Filters.SettingValue != nil {
+	if s.Filters.SettingValue != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.SettingValue(f)
+		tExpr, f, err = s.Filters.SettingValue(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = SettingValueFilter(f)
@@ -16444,7 +16481,7 @@ func (s Store) QuerySettingValues(
 
 	expr = append(expr, tExpr...)
 
-	query := settingValueSelectQuery(s.config.Dialect).Where(expr...)
+	query := settingValueSelectQuery(s.Dialect).Where(expr...)
 
 	if f.Limit > 0 {
 		query = query.Limit(f.Limit)
@@ -16475,6 +16512,7 @@ func (s Store) QuerySettingValues(
 			return
 		}
 
+		aux = new(auxSettingValue)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for SettingValue: %w", err)
 			return
@@ -16500,8 +16538,8 @@ func (s Store) LookupSettingValueByNameOwnedBy(ctx context.Context, name string,
 	var (
 		rows   *sql.Rows
 		aux    = new(auxSettingValue)
-		lookup = settingValueSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("name")).Eq(strings.ToLower(name)),
+		lookup = settingValueSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("name")).Eq(strings.ToLower(name)),
 			goqu.I("rel_owner").Eq(ownedBy),
 		).Limit(1)
 	)
@@ -16617,7 +16655,7 @@ func (s Store) CreateTemplate(ctx context.Context, rr ...*systemType.Template) (
 			return
 		}
 
-		if err = s.Exec(ctx, templateInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, templateInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16634,7 +16672,7 @@ func (s Store) UpdateTemplate(ctx context.Context, rr ...*systemType.Template) (
 			return
 		}
 
-		if err = s.Exec(ctx, templateUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, templateUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16651,7 +16689,7 @@ func (s Store) UpsertTemplate(ctx context.Context, rr ...*systemType.Template) (
 			return
 		}
 
-		if err = s.Exec(ctx, templateUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, templateUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -16664,7 +16702,7 @@ func (s Store) UpsertTemplate(ctx context.Context, rr ...*systemType.Template) (
 // This function is auto-generated
 func (s Store) DeleteTemplate(ctx context.Context, rr ...*systemType.Template) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, templateDeleteQuery(s.config.Dialect, templatePrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, templateDeleteQuery(s.Dialect, templatePrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -16676,14 +16714,14 @@ func (s Store) DeleteTemplate(ctx context.Context, rr ...*systemType.Template) (
 //
 // This function is auto-generated
 func (s Store) DeleteTemplateByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, templateDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, templateDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateTemplates Deletes all rows from the template collection
 func (s Store) TruncateTemplates(ctx context.Context) error {
-	return s.Exec(ctx, templateTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, templateTruncateQuery(s.Dialect))
 }
 
 // SearchTemplates returns (filtered) set of Templates
@@ -16875,7 +16913,7 @@ func (s Store) QueryTemplates(
 
 		set         = make([]*systemType.Template, 0, DefaultSliceCapacity)
 		res         *systemType.Template
-		aux         auxTemplate
+		aux         *auxTemplate
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -16883,9 +16921,9 @@ func (s Store) QueryTemplates(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.Template != nil {
+	if s.Filters.Template != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.Template(f)
+		tExpr, f, err = s.Filters.Template(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = TemplateFilter(f)
@@ -16907,7 +16945,7 @@ func (s Store) QueryTemplates(
 		}
 	}
 
-	query := templateSelectQuery(s.config.Dialect).Where(expr...)
+	query := templateSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableTemplateFields()); err != nil {
@@ -16948,6 +16986,7 @@ func (s Store) QueryTemplates(
 			return
 		}
 
+		aux = new(auxTemplate)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for Template: %w", err)
 			return
@@ -16985,7 +17024,7 @@ func (s Store) LookupTemplateByID(ctx context.Context, id uint64) (_ *systemType
 	var (
 		rows   *sql.Rows
 		aux    = new(auxTemplate)
-		lookup = templateSelectQuery(s.config.Dialect).Where(
+		lookup = templateSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -17027,8 +17066,8 @@ func (s Store) LookupTemplateByHandle(ctx context.Context, handle string) (_ *sy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxTemplate)
-		lookup = templateSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+		lookup = templateSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -17178,7 +17217,7 @@ func (s Store) CreateUser(ctx context.Context, rr ...*systemType.User) (err erro
 			return
 		}
 
-		if err = s.Exec(ctx, userInsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, userInsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -17195,7 +17234,7 @@ func (s Store) UpdateUser(ctx context.Context, rr ...*systemType.User) (err erro
 			return
 		}
 
-		if err = s.Exec(ctx, userUpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, userUpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -17212,7 +17251,7 @@ func (s Store) UpsertUser(ctx context.Context, rr ...*systemType.User) (err erro
 			return
 		}
 
-		if err = s.Exec(ctx, userUpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, userUpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -17225,7 +17264,7 @@ func (s Store) UpsertUser(ctx context.Context, rr ...*systemType.User) (err erro
 // This function is auto-generated
 func (s Store) DeleteUser(ctx context.Context, rr ...*systemType.User) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, userDeleteQuery(s.config.Dialect, userPrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, userDeleteQuery(s.Dialect, userPrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -17237,14 +17276,14 @@ func (s Store) DeleteUser(ctx context.Context, rr ...*systemType.User) (err erro
 //
 // This function is auto-generated
 func (s Store) DeleteUserByID(ctx context.Context, id uint64) error {
-	return s.Exec(ctx, userDeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, userDeleteQuery(s.Dialect, goqu.Ex{
 		"id": id,
 	}))
 }
 
 // TruncateUsers Deletes all rows from the user collection
 func (s Store) TruncateUsers(ctx context.Context) error {
-	return s.Exec(ctx, userTruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, userTruncateQuery(s.Dialect))
 }
 
 // SearchUsers returns (filtered) set of Users
@@ -17436,7 +17475,7 @@ func (s Store) QueryUsers(
 
 		set         = make([]*systemType.User, 0, DefaultSliceCapacity)
 		res         *systemType.User
-		aux         auxUser
+		aux         *auxUser
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -17444,9 +17483,9 @@ func (s Store) QueryUsers(
 		sortExpr []exp.OrderedExpression
 	)
 
-	if s.config.Filters.User != nil {
+	if s.Filters.User != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.User(f)
+		tExpr, f, err = s.Filters.User(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = UserFilter(f)
@@ -17468,7 +17507,7 @@ func (s Store) QueryUsers(
 		}
 	}
 
-	query := userSelectQuery(s.config.Dialect).Where(expr...)
+	query := userSelectQuery(s.Dialect).Where(expr...)
 
 	// sorting feature is enabled
 	if sortExpr, err = order(f.Sort, s.sortableUserFields()); err != nil {
@@ -17509,6 +17548,7 @@ func (s Store) QueryUsers(
 			return
 		}
 
+		aux = new(auxUser)
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for User: %w", err)
 			return
@@ -17546,7 +17586,7 @@ func (s Store) LookupUserByID(ctx context.Context, id uint64) (_ *systemType.Use
 	var (
 		rows   *sql.Rows
 		aux    = new(auxUser)
-		lookup = userSelectQuery(s.config.Dialect).Where(
+		lookup = userSelectQuery(s.Dialect).Where(
 			goqu.I("id").Eq(id),
 		).Limit(1)
 	)
@@ -17588,8 +17628,8 @@ func (s Store) LookupUserByEmail(ctx context.Context, email string) (_ *systemTy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxUser)
-		lookup = userSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("email")).Eq(strings.ToLower(email)),
+		lookup = userSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("email")).Eq(strings.ToLower(email)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -17631,8 +17671,8 @@ func (s Store) LookupUserByHandle(ctx context.Context, handle string) (_ *system
 	var (
 		rows   *sql.Rows
 		aux    = new(auxUser)
-		lookup = userSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
+		lookup = userSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("handle")).Eq(strings.ToLower(handle)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)
@@ -17674,8 +17714,8 @@ func (s Store) LookupUserByUsername(ctx context.Context, username string) (_ *sy
 	var (
 		rows   *sql.Rows
 		aux    = new(auxUser)
-		lookup = userSelectQuery(s.config.Dialect).Where(
-			s.config.Functions.LOWER(goqu.I("username")).Eq(strings.ToLower(username)),
+		lookup = userSelectQuery(s.Dialect).Where(
+			s.Functions.LOWER(goqu.I("username")).Eq(strings.ToLower(username)),
 			goqu.I("deleted_at").IsNull(),
 		).Limit(1)
 	)

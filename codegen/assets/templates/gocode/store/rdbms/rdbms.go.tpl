@@ -44,7 +44,7 @@ func (s Store) Create{{ .expIdent }}(ctx context.Context, {{ template "extraArgs
 			return
 		}
 
-		if err = s.Exec(ctx, {{ .ident }}InsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, {{ .ident }}InsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -62,7 +62,7 @@ func (s Store) Update{{ .expIdent }}(ctx context.Context, {{ template "extraArgs
 			return
 		}
 
-		if err = s.Exec(ctx, {{ .ident }}UpdateQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, {{ .ident }}UpdateQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -79,7 +79,7 @@ func (s Store) Upsert{{ .expIdent }}(ctx context.Context, {{ template "extraArgs
 			return
 		}
 
-		if err = s.Exec(ctx, {{ .ident }}UpsertQuery(s.config.Dialect, rr[i])); err != nil {
+		if err = s.Exec(ctx, {{ .ident }}UpsertQuery(s.Dialect, rr[i])); err != nil {
 			return
 		}
 	}
@@ -92,7 +92,7 @@ func (s Store) Upsert{{ .expIdent }}(ctx context.Context, {{ template "extraArgs
 // This function is auto-generated
 func (s Store) Delete{{ .expIdent }}(ctx context.Context, {{ template "extraArgs" .ident }} rr ...*{{ .goType }}) (err error) {
 	for i := range rr {
-		if err = s.Exec(ctx, {{ .ident }}DeleteQuery(s.config.Dialect, {{ .ident }}PrimaryKeys(rr[i]))); err != nil {
+		if err = s.Exec(ctx, {{ .ident }}DeleteQuery(s.Dialect, {{ .ident }}PrimaryKeys(rr[i]))); err != nil {
 			return
 		}
 	}
@@ -104,7 +104,7 @@ func (s Store) Delete{{ .expIdent }}(ctx context.Context, {{ template "extraArgs
 //
 // This function is auto-generated
 func (s Store) {{ .api.deleteByPK.expFnIdent }}(ctx context.Context, {{ template "extraArgs" .ident }} {{ range .api.deleteByPK.primaryKeys }}{{ .ident }} {{ .goType }},{{ end }}) error {
-	return s.Exec(ctx, {{ .ident }}DeleteQuery(s.config.Dialect, goqu.Ex{
+	return s.Exec(ctx, {{ .ident }}DeleteQuery(s.Dialect, goqu.Ex{
 	{{- range .api.deleteByPK.primaryKeys }}
 		{{ printf "%q" .storeIdent }}: {{ .ident }},
 	{{- end }}
@@ -113,7 +113,7 @@ func (s Store) {{ .api.deleteByPK.expFnIdent }}(ctx context.Context, {{ template
 
 // Truncate{{ .expIdentPlural }} Deletes all rows from the {{ .ident }} collection
 func (s Store) Truncate{{ .expIdentPlural }}(ctx context.Context, {{ template "extraArgs" .ident }}) error {
-	return s.Exec(ctx, {{ .ident }}TruncateQuery(s.config.Dialect))
+	return s.Exec(ctx, {{ .ident }}TruncateQuery(s.Dialect))
 }
 
 // Search{{ .expIdentPlural }} returns (filtered) set of {{ .expIdentPlural }}
@@ -315,7 +315,7 @@ func (s Store) Query{{ .expIdentPlural }}(
 	{{ end }}
 		set         = make([]*{{ .goType }}, 0, DefaultSliceCapacity)
 		res         *{{ .goType }}
-		aux         {{ .auxIdent }}
+		aux         *{{ .auxIdent }}
 		rows        *sql.Rows
 		count       uint
 		expr, tExpr []goqu.Expression
@@ -324,9 +324,9 @@ func (s Store) Query{{ .expIdentPlural }}(
 	{{ end }}
 	)
 
-	if s.config.Filters.{{ .expIdent }} != nil {
+	if s.Filters.{{ .expIdent }} != nil {
 		// extended filter set
-		tExpr, f, err = s.config.Filters.{{ .expIdent }}(f)
+		tExpr, f, err = s.Filters.{{ .expIdent }}(f)
 	} else {
 		// using generated filter
 		tExpr, f, err = {{ .expIdent }}Filter(f)
@@ -351,7 +351,7 @@ func (s Store) Query{{ .expIdentPlural }}(
 	{{ end }}
 
 
-	query := {{ .ident }}SelectQuery(s.config.Dialect).Where(expr...)
+	query := {{ .ident }}SelectQuery(s.Dialect).Where(expr...)
 
 	{{ if .features.sorting }}
 	// sorting feature is enabled
@@ -377,8 +377,6 @@ func (s Store) Query{{ .expIdentPlural }}(
 	}
 
 
-
-
 	if err = rows.Err(); err != nil {
 		err = fmt.Errorf("could not query {{ .expIdent }}: %w", err)
 		return
@@ -398,6 +396,7 @@ func (s Store) Query{{ .expIdentPlural }}(
 			return
 		}
 
+		aux = new({{ .auxIdent }})
 		if err = aux.scan(rows); err != nil {
 			err = fmt.Errorf("could not scan rows for {{ .expIdent }}: %w", err)
 			return
@@ -439,10 +438,10 @@ func (s Store) Query{{ .expIdentPlural }}(
 		var (
 			rows *sql.Rows
 			aux = new({{ .auxIdent }})
-			lookup = {{ .ident }}SelectQuery(s.config.Dialect).Where(
+			lookup = {{ .ident }}SelectQuery(s.Dialect).Where(
 				{{- range .args }}
 					{{- if .ignoreCase }}
-					s.config.Functions.LOWER(goqu.I({{ printf "%q" .storeIdent }})).Eq(strings.ToLower({{ .ident }})),
+					s.Functions.LOWER(goqu.I({{ printf "%q" .storeIdent }})).Eq(strings.ToLower({{ .ident }})),
 					{{- else }}
 					goqu.I({{ printf "%q" .storeIdent }}).Eq({{ .ident }}),
 					{{- end }}
