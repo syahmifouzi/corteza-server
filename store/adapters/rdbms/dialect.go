@@ -32,7 +32,12 @@ func DeepIdentJSON(ident string, pp ...interface{}) exp.Expression {
 	)
 
 	for _, p := range pp {
-		args = append(args, exp.NewLiteralExpression("?", p))
+		switch p.(type) {
+		case string, int:
+			args = append(args, exp.NewLiteralExpression("?", p))
+		default:
+			panic("invalid type")
+		}
 	}
 
 	return exp.NewLiteralExpression(sql, args...)
