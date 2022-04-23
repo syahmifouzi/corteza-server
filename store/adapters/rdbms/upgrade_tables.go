@@ -1,4 +1,8 @@
-package schema
+package rdbms
+
+import (
+	. "github.com/cortezaproject/corteza-server/store/adapters/rdbms/ddl"
+)
 
 const (
 	handleLength   = 64
@@ -21,8 +25,8 @@ const (
 	languageKeyLength = 256
 )
 
-// Tables fn holds a list of all tables that need to be created for Corteza
-func tables() []*Table {
+// Tables fn holds a list of all tables that need to be created
+func Tables() []*Table {
 	return []*Table{
 		tableUsers(),
 		tableCredentials(),
@@ -49,8 +53,7 @@ func tables() []*Table {
 		tableComposeModuleField(),
 		tableComposeNamespace(),
 		tableComposePage(),
-		tableComposeRecord(),
-		tableComposeRecordValue(),
+		tableComposeRecords(),
 		tableFederationModuleShared(),
 		tableFederationModuleExposed(),
 		tableFederationModuleMapping(),
@@ -380,34 +383,6 @@ func tableComposeAttachment() *Table {
 	)
 }
 
-//func tableComposeRecordAttachment() *Table {
-//	return TableDef("compose_record_attachments",
-//		ColumnDef("rel_attachment", ColumnTypeIdentifier),
-//		ColumnDef("rel_namespace", ColumnTypeIdentifier),
-//		ColumnDef("rel_module", ColumnTypeIdentifier),
-//		ColumnDef("rel_record", ColumnTypeIdentifier),
-//		ColumnDef("field", ColumnTypeIdentifier),
-//		ColumnDef("owned_by", ColumnTypeIdentifier),
-//		CUDTimestamps,
-//		CUDUsers,
-//
-//		PrimaryKey(IColumn("rel_attachment", "rel_namespace", "rel_module", "field")),
-//	)
-//}
-
-//func tableComposePageAttachment() *Table {
-//	return TableDef("compose_record_attachments",
-//		ColumnDef("rel_attachment", ColumnTypeIdentifier),
-//		ColumnDef("rel_namespace", ColumnTypeIdentifier),
-//		ColumnDef("rel_page", ColumnTypeIdentifier),
-//		ColumnDef("owned_by", ColumnTypeIdentifier),
-//		CUDTimestamps,
-//		CUDUsers,
-//
-//		PrimaryKey(IColumn("rel_attachment", "rel_namespace", "rel_page")),
-//	)
-//}
-
 func tableComposeChart() *Table {
 	return TableDef("compose_chart",
 		ID,
@@ -495,32 +470,19 @@ func tableComposePage() *Table {
 	)
 }
 
-func tableComposeRecord() *Table {
-	return TableDef("compose_record",
+// new generic record table with JSON encoded values
+func tableComposeRecords() *Table {
+	return TableDef("compose_records",
 		ID,
 		ColumnDef("rel_namespace", ColumnTypeIdentifier),
-		ColumnDef("module_id", ColumnTypeIdentifier),
+		ColumnDef("rel_module", ColumnTypeIdentifier),
 		ColumnDef("owned_by", ColumnTypeIdentifier),
+		ColumnDef("values", ColumnTypeJson),
 		CUDTimestamps,
 		CUDUsers,
 
 		AddIndex("namespace", IColumn("rel_namespace")),
 		AddIndex("module", IColumn("module_id")),
-		AddIndex("owner", IColumn("owned_by")),
-	)
-}
-
-func tableComposeRecordValue() *Table {
-	return TableDef("compose_record_value",
-		ColumnDef("record_id", ColumnTypeIdentifier),
-		ColumnDef("name", ColumnTypeVarchar, ColumnTypeLength(64)),
-		ColumnDef("value", ColumnTypeText, ColumnTypeFlag("mysqlLongText", true)),
-		ColumnDef("ref", ColumnTypeIdentifier),
-		ColumnDef("place", ColumnTypeInteger),
-		ColumnDef("deleted_at", ColumnTypeTimestamp, Null),
-
-		PrimaryKey(IColumn("record_id", "name", "place")),
-		AddIndex("ref", IColumn("ref"), IWhere("ref > 0")),
 	)
 }
 

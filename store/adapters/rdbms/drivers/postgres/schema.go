@@ -1,15 +1,21 @@
-package sqlite
+package postgres
 
-//// SQLite specific prefixes, sql
-//// templates, functions and other helpers
-//
+import (
+	"context"
+	"fmt"
+
+	"github.com/cortezaproject/corteza-server/store/adapters/rdbms/ddl"
+)
+
+// PostgreSQL specific prefixes, sql
+// templates, functions and other helpers
+
 //import (
 //	"context"
-//	"database/sql"
 //	"fmt"
 //
 //	"github.com/cortezaproject/corteza-server/store/adapters/rdbms"
-//	"github.com/cortezaproject/corteza-server/store/adapters/rdbms/schema"
+//	. "github.com/cortezaproject/corteza-server/store/adapters/rdbms/ddl"
 //	"go.uber.org/zap"
 //)
 //
@@ -17,31 +23,41 @@ package sqlite
 //	upgrader struct {
 //		log     *zap.Logger
 //		s       *rdbms.Store
-//		dialect *schema.CommonDialect
+//		dialect *CommonDialect
 //	}
 //)
+
+type (
+	SchemaModifier struct {
+		*ddl.GenericSchemaModifier
+	}
+)
+
+func (s *SchemaModifier) TableExists(ctx context.Context, db ddl.SqlExecer, table string) (bool, error) {
+	var exists bool
+
+	if err := db.GetContext(ctx, &exists, "SELECT TO_REGCLASS($1) IS NOT NULL", "public."+table); err != nil {
+		return false, fmt.Errorf("could not check if table exists: %w", err)
+	}
+
+	return exists, nil
+}
+
 //
-//// NewUpgrader returns SQLite schema upgrader
+//var (
+//	_ Upgrader = &upgrader{}
+//)
+//
+//// NewUpgrader returns PostgreSQL schema upgrader
 //func NewUpgrader(store *rdbms.Store) *upgrader {
 //	var g = &upgrader{
 //		log:     zap.NewNop(),
 //		s:       store,
-//		dialect: schema.NewCommonDialect(),
+//		dialect: NewCommonDialect(),
 //	}
 //
 //	// Modification to general DDL dialect to support Postgres requirements
-//
-//	// Cover mysql exceptions
-//	g.dialect.AddTemplateFunc("columnType", func(ct *schema.ColumnType) string {
-//		switch ct.Type {
-//		case schema.ColumnTypeTimestamp:
-//			return "TIMESTAMP"
-//		case schema.ColumnTypeBinary:
-//			return "BLOB"
-//		default:
-//			return schema.GenColumnType(ct)
-//		}
-//	})
+//	g.dialect.AddTemplate("create-table-suffix", "WITHOUT OIDS")
 //
 //	return g
 //}
@@ -56,19 +72,19 @@ package sqlite
 //
 //// Before runs before all tables are upgraded
 //func (u *upgrader) Before(ctx context.Context) error {
-//	return schema.CommonUpgrades(u.log, u).Before(ctx)
+//	return CommonUpgrades(u.log, u).Before(ctx)
 //}
 //
 //// After runs after all tables are upgraded
 //func (u *upgrader) After(ctx context.Context) error {
-//	return schema.CommonUpgrades(u.log, u).After(ctx)
+//	return CommonUpgrades(u.log, u).After(ctx)
 //}
 //
 //// CreateTable is triggered for every table defined in the rdbms package
 ////
 //// It checks if table is missing and creates it, otherwise
 //// it runs
-//func (u upgrader) CreateTable(ctx context.Context, t *schema.Table) (err error) {
+//func (u upgrader) CreateTable(ctx context.Context, t *Table) (err error) {
 //	var exists bool
 //	if exists, err = u.TableExists(ctx, t.Name); err != nil {
 //		return
@@ -97,8 +113,8 @@ package sqlite
 //}
 //
 //// upgradeTable applies any necessary changes connected to that specific table
-//func (u *upgrader) upgradeTable(ctx context.Context, t *schema.Table) error {
-//	g := schema.CommonUpgrades(u.log, u)
+//func (u *upgrader) upgradeTable(ctx context.Context, t *Table) error {
+//	g := CommonUpgrades(u.log, u)
 //
 //	switch t.Name {
 //	default:
@@ -109,7 +125,7 @@ package sqlite
 //func (u upgrader) TableExists(ctx context.Context, table string) (bool, error) {
 //	var exists bool
 //
-//	if err := u.s.DB().GetContext(ctx, &exists, "SELECT COUNT(*) > 0 FROM sqlite_master WHERE type = 'table' AND name = ?", table); err != nil {
+//	if err := u.s.DB().GetContext(ctx, &exists, "SELECT TO_REGCLASS($1) IS NOT NULL", "public."+table); err != nil {
 //		return false, fmt.Errorf("could not check if table exists: %w", err)
 //	}
 //
@@ -131,14 +147,14 @@ package sqlite
 //	return true, nil
 //}
 //
-//func (u upgrader) TableSchema(ctx context.Context, table string) (schema.Columns, error) {
+//func (u upgrader) TableSchema(ctx context.Context, table string) (Columns, error) {
 //	return nil, fmt.Errorf("pending implementation")
 //}
 //
 //// AddColumn adds column to table
-//func (u upgrader) AddColumn(ctx context.Context, table string, col *schema.Column) (added bool, err error) {
+//func (u upgrader) AddColumn(ctx context.Context, table string, col *Column) (added bool, err error) {
 //	err = func() error {
-//		var columns schema.Columns
+//		var columns Columns
 //		if columns, err = u.getColumns(ctx, table); err != nil {
 //			return err
 //		}
@@ -165,7 +181,7 @@ package sqlite
 //// DropColumn drops column from table
 //func (u upgrader) DropColumn(ctx context.Context, table, column string) (dropped bool, err error) {
 //	err = func() error {
-//		var columns schema.Columns
+//		var columns Columns
 //		if columns, err = u.getColumns(ctx, table); err != nil {
 //			return err
 //		}
@@ -196,7 +212,7 @@ package sqlite
 //			return nil
 //		}
 //
-//		var columns schema.Columns
+//		var columns Columns
 //		if columns, err = u.getColumns(ctx, table); err != nil {
 //			return err
 //		}
@@ -231,11 +247,19 @@ package sqlite
 //	return
 //}
 //
-//func (u upgrader) AddPrimaryKey(ctx context.Context, table string, ind *schema.Index) (added bool, err error) {
-//	return false, fmt.Errorf("adding primary keys on sqlite tables is not implemented")
+//func (u upgrader) AddPrimaryKey(ctx context.Context, table string, ind *Index) (added bool, err error) {
+//	if err = u.Exec(ctx, u.dialect.AddPrimaryKey(table, ind)); err != nil {
+//		return false, fmt.Errorf("could not add primary key to table %s: %w", table, err)
+//	}
+//
+//	return true, nil
 //}
 //
-//func (u upgrader) CreateIndex(ctx context.Context, ind *schema.Index) (added bool, err error) {
+//func (u upgrader) CreateIndex(ctx context.Context, ind *Index) (added bool, err error) {
+//	if added, err = u.hasIndex(ctx, ind.Table, ind.Name); added || err != nil {
+//		return
+//	}
+//
 //	if err = u.Exec(ctx, u.dialect.CreateIndex(ind)); err != nil {
 //		return false, fmt.Errorf("could not create index on table %s: %w", ind.Table, err)
 //	}
@@ -243,33 +267,46 @@ package sqlite
 //	return true, nil
 //}
 //
+//func (u upgrader) hasIndex(ctx context.Context, table, name string) (has bool, err error) {
+//	var (
+//		lookup = "SELECT COUNT(*) > 0 FROM pg_indexes WHERE tablename = $1 AND indexname = $2"
+//	)
+//
+//	return has, u.s.DB().GetContext(ctx, &has, lookup, table, table+"_"+name)
+//}
+//
 //// loads and returns all tables columns
-//func (u upgrader) getColumns(ctx context.Context, table string) (out schema.Columns, err error) {
+//func (u upgrader) getColumns(ctx context.Context, table string) (out Columns, err error) {
 //	type (
 //		col struct {
-//			CID          int            `db:"cid"`
-//			Name         string         `db:"name"`
-//			NotNull      bool           `db:"notnull"`
-//			PrimaryKey   bool           `db:"pk"`
-//			DefaultValue sql.NullString `db:"dflt_value"`
-//			Type         string         `db:"type"`
+//			Name       string `db:"column_name"`
+//			IsNullable bool   `db:"is_nullable"`
+//			DataType   string `db:"data_type"`
 //		}
 //	)
 //
 //	var (
-//		lookup = fmt.Sprintf(`PRAGMA TABLE_INFO(%q)`, table)
-//		cols   []*col
+//		lookup = `SELECT column_name,
+//                         is_nullable = 'YES' AS is_nullable,
+//                         data_type
+//                    FROM information_columns
+//                   WHERE table_catalog = $1
+//                     AND table_name = $2`
+//
+//		cols []*col
 //	)
 //
 //	if err = u.s.DB().SelectContext(ctx, &cols, lookup, u.s.Config().DBName, table); err != nil {
 //		return nil, err
 //	}
 //
-//	out = make([]*schema.Column, len(cols))
+//	out = make([]*Column, len(cols))
 //	for i := range cols {
-//		out[i] = &schema.Column{
-//			Name:   cols[i].Name,
-//			IsNull: !cols[i].NotNull,
+//		out[i] = &Column{
+//			Name: cols[i].Name,
+//			//Type:         ColumnType{},
+//			IsNull: cols[i].IsNullable,
+//			//DefaultValue: "",
 //		}
 //	}
 //

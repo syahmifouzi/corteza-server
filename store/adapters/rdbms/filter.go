@@ -178,7 +178,7 @@ func (f *extendedFilters) SetDefaults() {
 		}
 
 		if f.MemberID > 0 {
-			memberships := roleMemberSelectQuery(s.Config().Dialect).
+			memberships := roleMemberSelectQuery(s.Dialect).
 				Select("rel_role").
 				Where(goqu.C("rel_user").In(f.MemberID))
 
@@ -198,7 +198,7 @@ func (f *extendedFilters) SetDefaults() {
 		}
 
 		if len(f.RoleID) > 0 {
-			members := roleMemberSelectQuery(s.Config().Dialect).
+			members := roleMemberSelectQuery(s.Dialect).
 				Select("rel_user").
 				Where(goqu.C("rel_role").In(f.RoleID))
 
@@ -264,14 +264,20 @@ func (f *extendedFilters) SetDefaults() {
 	}
 }
 
+func Order(sort filter.SortExprSet, sortables map[string]string) (oo []exp.OrderedExpression, err error) {
+	return order(sort, sortables)
+}
+
 func order(sort filter.SortExprSet, sortables map[string]string) (oo []exp.OrderedExpression, err error) {
 	var (
 		has bool
 	)
 
 	for _, s := range sort {
-		if s.Column, has = sortables[strings.ToLower(s.Column)]; !has {
-			return nil, fmt.Errorf("column %q is not sortable", s.Column)
+		if len(sortables) > 0 {
+			if s.Column, has = sortables[strings.ToLower(s.Column)]; !has {
+				return nil, fmt.Errorf("column %q is not sortable", s.Column)
+			}
 		}
 
 		if s.Descending {
