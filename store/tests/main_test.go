@@ -6,10 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cortezaproject/corteza-server/pkg/logger"
 	"github.com/cortezaproject/corteza-server/store"
 	"github.com/cortezaproject/corteza-server/store/adapters/rdbms/drivers/mysql"
 	"github.com/cortezaproject/corteza-server/store/adapters/rdbms/drivers/postgres"
 	"github.com/cortezaproject/corteza-server/store/adapters/rdbms/drivers/sqlite"
+	"github.com/cortezaproject/corteza-server/store/adapters/rdbms/drivers/sqlserver"
 	"github.com/cortezaproject/corteza-server/tests/helpers"
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
@@ -34,6 +36,10 @@ func Test_RDBMS_MYSQL(t *testing.T) {
 	testAllGenerated(t, setup(t, mysql.Connect))
 }
 
+func Test_RDBMS_SQLSERVER(t *testing.T) {
+	testAllGenerated(t, setup(t, sqlserver.Connect))
+}
+
 func Test_RDBMS_PGSQL(t *testing.T) {
 	testAllGenerated(t, setup(t, postgres.Connect))
 }
@@ -55,7 +61,7 @@ func Test_ELASTICSEARCH(t *testing.T) {
 }
 
 func setup(t *testing.T, connect store.ConnectorFn) (s store.Storer) {
-	t.Parallel()
+	// t.Parallel()
 
 	if connect == nil {
 		t.Skipf("connection function not set, skipping tests")
@@ -79,6 +85,8 @@ func setup(t *testing.T, connect store.ConnectorFn) (s store.Storer) {
 		t.Errorf("failed to initialize: %v", err)
 		return
 	}
+
+	s.SetLogger(logger.Default())
 
 	err = store.Upgrade(ctx, zap.NewNop(), s)
 	if err != nil {

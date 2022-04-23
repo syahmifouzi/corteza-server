@@ -18,6 +18,7 @@ require (
 	github.com/crewjam/saml v0.4.6
 	github.com/crusttech/go-oidc v0.0.0-20180918092017-982855dad3e1
 	github.com/davecgh/go-spew v1.1.1
+	github.com/denisenkom/go-mssqldb v0.12.0
 	github.com/dgryski/dgoogauth v0.0.0-20190221195224-5a805980a5f3
 	github.com/disintegration/imaging v1.6.2
 	github.com/dop251/goja v0.0.0-20220422102209-3faab1d8f20e
@@ -89,6 +90,8 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/goccy/go-json v0.9.6 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
+	github.com/golang-sql/sqlexp v0.0.0-20170517235910-f1bb20e5a188 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
