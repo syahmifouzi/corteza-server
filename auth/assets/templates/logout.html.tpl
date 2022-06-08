@@ -10,7 +10,11 @@
 			{{ .form.error }}
 		</div>
 		{{ else }}
-		<div class="text-dark font-weight-bold" role="primary">
+		<div
+			data-test-id="message-logout-successful"
+			class="text-dark font-weight-bold"
+			role="primary"
+		>
 			{{ tr "logout.template.log-out" }}
 		</div>
 		{{ end }}
