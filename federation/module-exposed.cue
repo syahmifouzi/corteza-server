@@ -16,7 +16,7 @@ exposedModule: schema.#Resource & {
 	struct: {
 		id:          schema.IdField
 		handle:      schema.HandleField
-		name: {}
+		name: { sortable: true }
 		node_id: { ident: "nodeID", goType: "uint64", storeIdent: "rel_node" }
 		compose_module_id: { ident: "composeModuleID", goType: "uint64", storeIdent: "rel_compose_module" }
 		compose_namespace_id: { ident: "composeNamespaceID", goType: "uint64", storeIdent: "rel_compose_namespace" }

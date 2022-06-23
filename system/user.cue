@@ -8,10 +8,10 @@ user: schema.#Resource & {
 	struct: {
 		id:     schema.IdField
 		handle: schema.HandleField
-		email: {unique: true, ignoreCase: true}
+		email: {sortable: true, unique: true, ignoreCase: true}
 		email_confirmed: {goType: "bool"}
-		username: {unique: true, ignoreCase: true}
-		name: {}
+		username: {sortable: true, unique: true, ignoreCase: true}
+		name: {sortable: true}
 		kind: {goType: "types.UserKind"}
 		meta: {goType: "*types.UserMeta"}
 		created_at: schema.SortableTimestampField

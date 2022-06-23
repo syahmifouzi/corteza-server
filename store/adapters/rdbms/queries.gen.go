@@ -601,8 +601,8 @@ var (
 			"scope",
 			"valid_grant",
 			"redirect_uri",
-			"trusted",
 			"enabled",
+			"trusted",
 			"valid_from",
 			"expires_at",
 			"security",
@@ -629,8 +629,8 @@ var (
 				"scope":        res.Scope,
 				"valid_grant":  res.ValidGrant,
 				"redirect_uri": res.RedirectURI,
-				"trusted":      res.Trusted,
 				"enabled":      res.Enabled,
+				"trusted":      res.Trusted,
 				"valid_from":   res.ValidFrom,
 				"expires_at":   res.ExpiresAt,
 				"security":     res.Security,
@@ -660,8 +660,8 @@ var (
 						"scope":        res.Scope,
 						"valid_grant":  res.ValidGrant,
 						"redirect_uri": res.RedirectURI,
-						"trusted":      res.Trusted,
 						"enabled":      res.Enabled,
+						"trusted":      res.Trusted,
 						"valid_from":   res.ValidFrom,
 						"expires_at":   res.ExpiresAt,
 						"security":     res.Security,
@@ -689,8 +689,8 @@ var (
 				"scope":        res.Scope,
 				"valid_grant":  res.ValidGrant,
 				"redirect_uri": res.RedirectURI,
-				"trusted":      res.Trusted,
 				"enabled":      res.Enabled,
+				"trusted":      res.Trusted,
 				"valid_from":   res.ValidFrom,
 				"expires_at":   res.ExpiresAt,
 				"security":     res.Security,
@@ -2917,13 +2917,12 @@ var (
 	//
 	// This function is auto-generated
 	federationModuleMappingUpsertQuery = func(d goqu.DialectWrapper, res *federationType.ModuleMapping) *goqu.InsertDataset {
-		var target = ``
+		var target = `,node_id`
 
 		return federationModuleMappingInsertQuery(d, res).
 			OnConflict(
 				goqu.DoUpdate(target[1:],
 					goqu.Record{
-						"node_id":              res.NodeID,
 						"federation_module_id": res.FederationModuleID,
 						"compose_module_id":    res.ComposeModuleID,
 						"compose_namespace_id": res.ComposeNamespaceID,
@@ -2939,7 +2938,6 @@ var (
 	federationModuleMappingUpdateQuery = func(d goqu.DialectWrapper, res *federationType.ModuleMapping) *goqu.UpdateDataset {
 		return d.Update(federationModuleMappingTable).
 			Set(goqu.Record{
-				"node_id":              res.NodeID,
 				"federation_module_id": res.FederationModuleID,
 				"compose_module_id":    res.ComposeModuleID,
 				"compose_namespace_id": res.ComposeNamespaceID,
@@ -2966,7 +2964,9 @@ var (
 	//
 	// This function is auto-generated
 	federationModuleMappingPrimaryKeys = func(res *federationType.ModuleMapping) goqu.Ex {
-		return goqu.Ex{}
+		return goqu.Ex{
+			"node_id": res.NodeID,
+		}
 	}
 
 	// federationNodeTable represents federationNodes store table
