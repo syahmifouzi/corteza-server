@@ -48,6 +48,7 @@ type (
 		FindByHandle(ctx context.Context, namespaceID uint64, handle string) (*types.Module, error)
 		FindByAny(ctx context.Context, namespaceID uint64, identifier interface{}) (*types.Module, error)
 		Find(ctx context.Context, filter types.ModuleFilter) (set types.ModuleSet, f types.ModuleFilter, err error)
+		FindSensitive(ctx context.Context, filter types.ModuleFilter) (set []types.PrivateModule, err error)
 
 		Create(ctx context.Context, module *types.Module) (*types.Module, error)
 		Update(ctx context.Context, module *types.Module) (*types.Module, error)
@@ -381,6 +382,46 @@ func (svc module) UndeleteByID(ctx context.Context, namespaceID, moduleID uint64
 // Directly using store so we don't spam the action log
 func (svc *module) ReloadDALModels(ctx context.Context) (err error) {
 	return dalutils.ComposeModulesReload(ctx, svc.store, svc.dal)
+}
+
+// FindSensitive will list all module with at least one private module field
+func (svc module) FindSensitive(ctx context.Context, filter types.ModuleFilter) (set []types.PrivateModule, err error) {
+	var (
+		mm types.ModuleSet
+	)
+
+	err = func() error {
+		mm, _, err = svc.Find(ctx, filter)
+		if err != nil {
+			return err
+		}
+
+		for _, m := range mm {
+			// @todo allow the request to specify what level we wish to see if needed
+			isPrivate := false
+			for _, f := range m.Fields {
+				if !isPrivate {
+					isPrivate = f.Private
+				}
+			}
+
+			if isPrivate && m != nil {
+				set = append(set, types.PrivateModule{
+					ID:           m.ID,
+					Name:         m.Name, // @todo get this as per translation
+					Handle:       m.Handle,
+					ConnectionID: m.ModelConfig.ConnectionID,
+					//ConnectionName: "", // @todo
+					//Location:       "", // @todo
+					//Owner:          false, // @todo
+				})
+			}
+		}
+
+		return nil
+	}()
+
+	return set, err
 }
 
 func (svc module) updater(ctx context.Context, namespaceID, moduleID uint64, action func(...*moduleActionProps) *moduleAction, fn moduleUpdateHandler) (*types.Module, error) {
@@ -858,7 +899,7 @@ func loadModuleFields(ctx context.Context, s store.Storer, mm ...*types.Module) 
 
 	for _, m := range mm {
 		m.Fields = ff.FilterByModule(m.ID)
-		m.Fields.Walk(func(f *types.ModuleField) error {
+		_ = m.Fields.Walk(func(f *types.ModuleField) error {
 			f.NamespaceID = m.NamespaceID
 			return nil
 		})

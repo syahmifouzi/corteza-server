@@ -102,6 +102,18 @@ type (
 		filter.Sorting
 		filter.Paging
 	}
+
+	PrivateModule struct {
+		ID     uint64 `json:"moduleID,string"`
+		Name   string `json:"name"`
+		Handle string `json:"handle"`
+
+		ConnectionID   uint64 `json:"connectionID,string"`
+		ConnectionName string `json:"ConnectionName"`
+		Location       string `json:"location"`
+
+		Owner bool `json:"owner"`
+	}
 )
 
 func (m Module) Clone() *Module {

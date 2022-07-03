@@ -29,6 +29,10 @@ type (
 		Values   []map[string]any `json:"values"`
 	}
 
+	sensitiveModuleSetPayload struct {
+		Set []types.PrivateModule `json:"set"`
+	}
+
 	privateDataFinder interface {
 		FindSensitive(ctx context.Context, filter types.RecordFilter) (set []types.PrivateDataSet, err error)
 	}
@@ -122,6 +126,58 @@ func (ctrl *DataPrivacy) SensitiveDataList(ctx context.Context, r *request.DataP
 			}
 
 			outSet.Set = append(outSet.Set, nsMod)
+		}
+	}
+
+	return outSet, nil
+}
+
+func (ctrl *DataPrivacy) SensitiveModuleList(ctx context.Context, r *request.DataPrivacySensitiveModuleList) (out interface{}, err error) {
+	outSet := sensitiveModuleSetPayload{}
+
+	primaryConnID := dal.Service().PrimaryConnectionID(ctx)
+
+	reqConns := make(map[uint64]bool)
+	hasReqConns := len(r.ConnectionID) > 0
+	for _, connectionID := range payload.ParseUint64s(r.ConnectionID) {
+		if connectionID == 0 {
+			connectionID = primaryConnID
+		}
+		reqConns[connectionID] = true
+	}
+
+	// All namespaces
+	namespaces, _, err := ctrl.namespace.Find(ctx, types.NamespaceFilter{})
+	if err != nil {
+		return
+	}
+
+	outSet.Set = make([]types.PrivateModule, 0)
+
+	for _, n := range namespaces {
+		// All modules
+		modules, _, err := ctrl.module.Find(ctx, types.ModuleFilter{NamespaceID: n.ID})
+		if err != nil {
+			return nil, err
+		}
+		for _, m := range modules {
+			conn := m.ModelConfig.ConnectionID
+			if conn == 0 {
+				conn = primaryConnID
+			}
+			if hasReqConns && !reqConns[conn] {
+				continue
+			}
+
+			mm, err := ctrl.module.FindSensitive(ctx, types.ModuleFilter{NamespaceID: m.NamespaceID})
+			if err != nil {
+				return nil, err
+			}
+			if len(mm) == 0 {
+				continue
+			}
+
+			outSet.Set = append(outSet.Set, mm...)
 		}
 	}
 

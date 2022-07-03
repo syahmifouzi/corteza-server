@@ -44,6 +44,13 @@ type (
 		// Filter by connection ID
 		ConnectionID []string
 	}
+
+	DataPrivacySensitiveModuleList struct {
+		// ConnectionID GET parameter
+		//
+		// Filter by connection ID
+		ConnectionID []string
+	}
 )
 
 // NewDataPrivacySensitiveDataList request
@@ -82,6 +89,46 @@ func (r *DataPrivacySensitiveDataList) Fill(req *http.Request) (err error) {
 				return err
 			}
 		}
+		if val, ok := tmp["connectionID[]"]; ok {
+			r.ConnectionID, err = val, nil
+			if err != nil {
+				return err
+			}
+		} else if val, ok := tmp["connectionID"]; ok {
+			r.ConnectionID, err = val, nil
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return err
+}
+
+// NewDataPrivacySensitiveModuleList request
+func NewDataPrivacySensitiveModuleList() *DataPrivacySensitiveModuleList {
+	return &DataPrivacySensitiveModuleList{}
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r DataPrivacySensitiveModuleList) Auditable() map[string]interface{} {
+	return map[string]interface{}{
+		"connectionID": r.ConnectionID,
+	}
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r DataPrivacySensitiveModuleList) GetConnectionID() []string {
+	return r.ConnectionID
+}
+
+// Fill processes request and fills internal variables
+func (r *DataPrivacySensitiveModuleList) Fill(req *http.Request) (err error) {
+
+	{
+		// GET params
+		tmp := req.URL.Query()
+
 		if val, ok := tmp["connectionID[]"]; ok {
 			r.ConnectionID, err = val, nil
 			if err != nil {
