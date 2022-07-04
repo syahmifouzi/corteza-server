@@ -30,6 +30,8 @@ type (
 		CanUpdateRole(context.Context, *types.Role) bool
 		CanDeleteRole(context.Context, *types.Role) bool
 		CanManageMembersOnRole(context.Context, *types.Role) bool
+
+		CloneRulesByRoleID(ctx context.Context, roleID uint64, toRoleID ...uint64) error
 	}
 
 	rolePayload struct {
@@ -244,4 +246,9 @@ func (ctrl Role) makeFilterPayload(ctx context.Context, nn types.RoleSet, f type
 	}
 
 	return msp, nil
+}
+
+func (ctrl Role) Clone(ctx context.Context, r *request.RoleClone) (interface{}, error) {
+	// Clone rules from role S to role T
+	return api.OK(), ctrl.ac.CloneRulesByRoleID(ctx, r.RoleID, payload.ParseUint64s(r.CloneToRoleID)...)
 }
