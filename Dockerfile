@@ -1,5 +1,6 @@
 # deploy stage
-FROM ubuntu:20.04
+# Ubuntu 22.04 must be the same as ubuntu during make release
+FROM ubuntu:22.04
 
 RUN apt-get -y update \
  && apt-get -y install \
@@ -9,13 +10,14 @@ RUN apt-get -y update \
 
 ARG VERSION=2022.9
 ARG SERVER_VERSION=${VERSION}
-ARG CORTEZA_SERVER_PATH=https://releases.cortezaproject.org/files/corteza-server-${SERVER_VERSION}-linux-amd64.tar.gz
+# ARG CORTEZA_SERVER_PATH=https://releases.cortezaproject.org/files/corteza-server-${SERVER_VERSION}-linux-amd64.tar.gz
 RUN mkdir /tmp/server
-ADD $CORTEZA_SERVER_PATH /tmp/server
+# ADD $CORTEZA_SERVER_PATH /tmp/server
+COPY ./my-release/corteza-server-2022.9.0-dev.1-linux-amd64.tar.gz /tmp/server
 
 VOLUME /data
 
-RUN tar -zxvf "/tmp/server/$(basename $CORTEZA_SERVER_PATH)" -C / && \
+RUN tar -zxvf "/tmp/server/corteza-server-2022.9.0-dev.1-linux-amd64.tar.gz" -C / && \
     rm -rf "/tmp/server" && \
     mv /corteza-server /corteza
 

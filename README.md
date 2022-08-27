@@ -28,6 +28,23 @@ Binary data is handled locally or on a supported cloud provider using [MinIO](ht
 
 <br />
 
+## My Note
+install miniconda using
+> Also keep note kene install golang also
+> bash Miniconda3-latest-Linux-x86_64.sh
+> initialize during the installation
+> conda config --set auto_activate_base false
+> conda create -n mimi -c conda-forge nodejs
+> conda activate mimi
+> corepack enable
+
+
+
+If there is a warning to update conda
+> conda update -n base -c defaults conda
+
+
+
 ## What is Corteza?
 
 <div align="center">
