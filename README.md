@@ -28,6 +28,47 @@ Binary data is handled locally or on a supported cloud provider using [MinIO](ht
 
 <br />
 
+## My Note
+error rollup-plugin-styles@4.0.0: The engine "node" is incompatible with this module. Expected version "^12.20.0 || ^14.13.1 || >=16.0.0". Got "14.8.0"
+
+> Also keep note kene install golang also
+> bash Miniconda3-latest-Linux-x86_64.sh
+> initialize during the installation
+> conda config --set auto_activate_base false
+> conda create -n mimi -c conda-forge nodejs=14.13.1
+> conda activate mimi
+for enabling yarn (from official website)
+> corepack enable
+for node version < 16
+> npm i -g corepack
+for yarn version 1
+> npm install --global yarn
+
+
+If there is a warning to update conda
+> conda update -n base -c defaults conda
+
+conda search
+> conda search -c conda-forge nodejs
+
+conda remove:
+> conda env remove -n mimi
+
+yarn unlink:
+> yarn unlink
+
+to compile corteza-server
+> make release-clean
+> change onboarding-tour.yaml
+> make release
+> check dockerfile to point to the correct build name
+> change .dockerignore to allow "build" and "webapp" folder
+> sudo docker build -t my-corteza:1.2 .
+
+> sudo docker image ls
+> sudo docker rmi <IMAGE-ID>
+
+
 ## What is Corteza?
 
 <div align="center">
