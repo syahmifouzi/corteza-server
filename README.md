@@ -31,6 +31,18 @@ Binary data is handled locally or on a supported cloud provider using [MinIO](ht
 ## My Note
 error rollup-plugin-styles@4.0.0: The engine "node" is incompatible with this module. Expected version "^12.20.0 || ^14.13.1 || >=16.0.0". Got "14.8.0"
 
+Error:
+cgo: C compiler "x86_64-conda-linux-gnu-cc" not found: exec: "x86_64-conda-linux-gnu-cc": executable file not found in $PATH
+note:
+this maydue to go is installed inside conda. need to append the correct path
+export PATH=/home/netgeo/miniconda3/envs/netgeo2:$PATH
+export PATH=$PATH:/home/netgeo/miniconda3/envs/netgeo2/x86_64-conda-linux-gnu/bin
+echo $PATH
+wrong:
+maybe need to install golang natively instead of conda
+check which one system use:
+which make
+
 > Also keep note kene install golang also
 > bash Miniconda3-latest-Linux-x86_64.sh
 > initialize during the installation
