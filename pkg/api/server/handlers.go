@@ -279,7 +279,7 @@ func handleStaticPages(log *zap.Logger, hOpt options.HttpServerOpt, aOpt options
 	links = append(links, fmt.Sprintf(linkTpl, aOpt.BaseURL, "Login"))
 
 	if hOpt.ApiEnabled {
-		links = append(links, fmt.Sprintf(linkTpl, "https://docs.cortezaproject.org/", "Documentation"))
+		links = append(links, fmt.Sprintf(linkTpl, "https://datageometry.io", "Developer"))
 	}
 
 	if hOpt.WebConsoleEnabled {
