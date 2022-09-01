@@ -102,8 +102,8 @@ func TestMailValidator(t *testing.T) {
 		{"abcd@gmail-yahoo.com", true},
 		{"abcd@gmailyahoo", true},
 		{"abcd@gmail.yahoo", true},
-		{"info @ crust tech", false},
-		{"info@crust.tech", true},
+		{"info @ netgeo tech", false},
+		{"info@netgeo.tech", true},
 	}
 
 	for _, tc := range ttc {
