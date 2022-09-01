@@ -532,7 +532,7 @@ func Auth() (o *AuthOpt) {
 		CsrfEnabled:              true,
 		CsrfFieldName:            "same-site-authenticity-token",
 		CsrfCookieName:           "same-site-authenticity-token",
-		DefaultClient:            "corteza-webapp",
+		DefaultClient:            "datageometry-webapp",
 	}
 
 	// Custom defaults

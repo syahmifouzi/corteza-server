@@ -108,7 +108,7 @@ auth: schema.#optionsGroup & {
 		session_cookie_secure: {
 			type:          "bool"
 			defaultGoExpr: "isSecure()"
-			description:   "Defaults to true when HTTPS is used. Corteza will try to guess the this setting by"
+			description:   "Defaults to true when HTTPS is used. datageometry will try to guess the this setting by"
 		}
 		session_lifetime: {
 			type: "time.Duration"
@@ -184,11 +184,11 @@ auth: schema.#optionsGroup & {
 			description:  "Cookie name used for CSRF protection"
 		}
 		default_client: {
-			defaultValue: "corteza-webapp"
+			defaultValue: "datageometry-webapp"
 			description: """
 				Handle for OAuth2 client used for automatic redirect from /auth/oauth2/go endpoint.
 
-				This simplifies configuration for OAuth2 flow for Corteza Web applications as it removes
+				This simplifies configuration for OAuth2 flow for DataGeometry Web applications as it removes
 				the need to suply redirection URL and client ID (oauth2/go endpoint does that internally)
 
 				"""
@@ -197,7 +197,7 @@ auth: schema.#optionsGroup & {
 			description: """
 				Path to js, css, images and template source files
 
-				When corteza starts, if path exists it tries to load template files from it.
+				When datageometry starts, if path exists it tries to load template files from it.
 
 				When empty path is set (default value), embedded files are used.
 				"""
@@ -205,7 +205,7 @@ auth: schema.#optionsGroup & {
 		development_mode: {
 			type: "bool"
 			description: """
-				When enabled, corteza reloads template before every execution.
+				When enabled, datageometry reloads template before every execution.
 				Enable this for debugging or when developing auth templates.
 
 				Should be disabled in production where templates do not change between server restarts.

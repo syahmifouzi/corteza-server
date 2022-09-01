@@ -21,7 +21,7 @@ login:
       - { Label: Google,   Handle: google,   Icon: google }
       - { Label: Facebook, Handle: facebook, Icon: facebook }
       - { Label: GitHub,  Handle: github,  Icon: github }
-      - { Label: Corteza,  Handle: corteza,  Icon: shield-lock }
+      - { Label: DataGeometry,  Handle: datageometry,  Icon: shield-lock }
 
   Only external:
     settings:
@@ -31,7 +31,7 @@ login:
       - { Label: Google,   Handle: google,   Icon: google }
       - { Label: Facebook, Handle: facebook, Icon: facebook }
       - { Label: GitHub,  Handle: github,  Icon: github }
-      - { Label: Corteza,  Handle: corteza,  Icon: shield-lock }
+      - { Label: DataGeometry,  Handle: datageometry,  Icon: shield-lock }
 
   Without signup and pass reset:
     settings:
@@ -195,7 +195,7 @@ authorized-clients:
   Empty: {}
   Full:
     authorizedClients:
-      - Name: Corteza Web Applications
+      - Name: DataGeometry Web Applications
       - Name: Matrix Chat server
       - Name: Company's Wordpress
 
