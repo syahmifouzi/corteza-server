@@ -12,7 +12,7 @@
 		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 		<!-- Custom CSS -->
 		<link href="{{ links.AuthAssets }}/style.css?{{ buildtime }}" rel="stylesheet">
-        <title>Corteza</title>
+        <title>DataGeometry</title>
 	</head>
 	<body style="background: url({{ links.Assets }}/release-background.png) no-repeat top;background-size: cover;background-attachment: fixed;">
         {{ if .user }}
