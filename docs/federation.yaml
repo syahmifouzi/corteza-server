@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
-  title: Corteza federation API
-  description: Corteza federation REST API definition
+  title: DataGeometry federation API
+  description: DataGeometry federation REST API definition
   version: 2020.12
   contact:
-    email: info@cortezaproject.org
+    email: syahmi@netgeometry.com
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'

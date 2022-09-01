@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
-  title: Corteza compose API
-  description: Corteza compose REST API definition
+  title: DataGeometry compose API
+  description: DataGeometry compose REST API definition
   version: 1.0.0
   contact:
-    email: contact@mail.com
+    email: syahmi@netgeometry.com
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'

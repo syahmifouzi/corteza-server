@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
-  title: Corteza system API
-  description: Corteza system REST API definition
+  title: DataGeometry system API
+  description: DataGeometry system REST API definition
   version: 2021.3
   contact:
-    email: contact@mail.com
+    email: syahmi@netgeometry.com
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
