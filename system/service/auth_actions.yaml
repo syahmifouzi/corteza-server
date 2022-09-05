@@ -208,5 +208,5 @@ errors:
     log: "rate limit exceeded for {{user}}"
 
   - error: maxUserLimitReached
-    message: "you have reached your user limit, contact your Corteza administrator"
+    message: "you have reached your user limit, contact DataGeometry support"
     severity: warning
